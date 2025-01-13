@@ -19,4 +19,4 @@ variable [Group G]
 /- Theorem 8: In a group G = (G,*) every element has a unique inverse. -/
 
 theorem unique_inverse :
-  (∀ x : S, x * 1 = x ∧ 1 * x = x) ∧ a * b = 1 ∧ c * b = 1 → b = c := by
+  (∀ x : G, x * 1 = x ∧ 1 * x = x) ∧ a * b = 1 ∧ c * b = 1 → b = c := by
