@@ -14,9 +14,9 @@ theorem mul_one_identity : (∀ x : S, x * e₁ = x) ∧ (∀ x : S, e₂ * x = 
   have h2 := h.right e₁
   rw [<-h1, h2]
 
-variable (e : S)
+variable [Group G]
 
 /- Theorem 8: In a group G = (G,*) every element has a unique inverse. -/
 
-theorem unique_inverse : (∀ x : S, x * e = x ∧ e * x = x)
-  ∧ a * b = e ∧ c * b = e → b = c := by
+theorem unique_inverse :
+  (∀ x : S, x * 1 = x ∧ 1 * x = x) ∧ a * b = 1 ∧ c * b = 1 → b = c := by
