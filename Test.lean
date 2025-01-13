@@ -16,8 +16,7 @@ theorem mul_one_identity : (∀ x : S, x * e₁ = x) ∧ (∀ x : S, e₂ * x = 
 
 variable (e : S)
 
-/- Theorem 8: If a group G = (G,*) has an identity element
-  then every element has a unique inverse then it is unique -/
+/- Theorem 8: In a group G = (G,*) every element has a unique inverse. -/
 
 theorem unique_inverse : (∀ x : S, x * e = x ∧ e * x = x)
   ∧ a * b = e ∧ c * b = e → b = c := by
