@@ -1,1 +1,4 @@
 /.lake
+/lake-manifest.json
+/lakefile.lean
+/lean-toolchain
