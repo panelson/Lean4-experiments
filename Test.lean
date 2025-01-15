@@ -1,4 +1,5 @@
 import Mathlib.Logic.Basic
+import Mathlib.Algebra.Group.Defs
 
 variable {S : Type*}
 
@@ -18,4 +19,11 @@ variable [Group G]
 
 /- Theorem 8: In a group G = (G,*) every element has a unique inverse. -/
 
-theorem unique_inverse : ∀ a b c : G, a * b = 1 ∧ c * b = 1 → b = c := by
+theorem unique_inverse : ∀ a b c : G, b * a = 1 ∧ a * c = 1 → b = c := by
+  intro a b c h
+  calc
+    b = b * 1 := by rw [mul_one]
+    _ = b * (a * c) := by rw [h.2]
+    _ = (b * a) * c := by rw [mul_assoc]
+    _ = 1 * c := by rw [h.1]
+    _ = c := by rw [one_mul]
