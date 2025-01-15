@@ -2,10 +2,8 @@
 
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-
 def IsContinuousAt (D : Set ℝ) (f : D → ℝ) (a : D) : Prop :=
-  ∀ ε > 0, ∃ δ > 0, ∀ x : D,
-  (|x.val - a.val| < δ  →  |f x - f a| < ε)
+  ∀ ε > 0, ∃ δ > 0, ∀ x : D, (|x.val - a.val| < δ  →  |f x - f a| < ε)
 
 def IsContinuous (D : Set ℝ) (f : D → ℝ) : Prop :=
   ∀ a : D, IsContinuousAt D f a
@@ -19,6 +17,6 @@ theorem constant_function_cont_at_a_point (D : Set ℝ) (c : ℝ) (a : D): IsCon
   simp only [sub_self, abs_zero]
   exact hεbigger0
 
-  theorem constant_function_is_continuous (D : Set ℝ) (c : ℝ): IsContinuous D (fun _ ↦ c) := by
+theorem constant_function_is_continuous (D : Set ℝ) (c : ℝ): IsContinuous D (fun _ ↦ c) := by
   intro a
   exact constant_function_cont_at_a_point D c a
