@@ -55,3 +55,10 @@ theorem mul_inverse : ∀ x y : G, (x * y)⁻¹ = y⁻¹ * x⁻¹ := by
     _ = ((x * y)⁻¹ * (x * y)) * (y⁻¹ * x⁻¹) := by rw [←mul_assoc]
     _ = 1 * (y⁻¹ * x⁻¹) := by rw [inv_mul_cancel]
     _ = y⁻¹ * x⁻¹ := by rw [one_mul]
+
+/- Theorem 10: S is an associative binary system with right identity such that each element has a right inverse. It then follows that G is a group -/
+
+--Show that if a * b = e => b * a = e. a * b = e, a * a ^-1 = e, a
+
+theorem right_id_and_inverse_imply_group : (h1 : ∀ x y : S, x * y = 1 = x * x⁻¹) (h2 : h1 → ) : Group S := by
+  sorry
