@@ -13,8 +13,8 @@ infixl:90 " ; "  => Comp.comp
 
 class RelationAlgebra (A : Type u) extends BooleanAlgebra A, Comp A, One A, Inv A where
 
-  assoc : ∀ x y z : A, x ; (y ; z) = (x ; y) ; z
-  distr : ∀ x y z : A, (x ⊔ y) ; z = x ; z ⊔ y ; z
+  assoc : ∀ x y z : A, (x ; y) ; z = x ; (y ; z)
+  rdist : ∀ x y z : A, (x ⊔ y) ; z = x ; z ⊔ y ; z
   comp_one : ∀ x : A, x ; 1 = x
   inv_inv  : ∀ x : A, x⁻¹⁻¹ = x
   inv_dist : ∀ x y : A, (x ⊔ y)⁻¹ = x⁻¹ ⊔ y⁻¹
