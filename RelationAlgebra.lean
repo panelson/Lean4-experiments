@@ -74,7 +74,7 @@ lemma comp_le_comp_left (z : A) {x y : A} (h : x ≤ y) : z ; x ≤ z ; y := by
     _ = z ; (x ⊔ y) := by rw [←ldist]
     _ = z ; y := by simp [h]
 
-lemma peirce_law (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
+lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
   intro h
   have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
@@ -99,6 +99,11 @@ lemma peirce_law (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := b
         _ = ⊥ := by simp
     have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
     exact bot_unique this
+
+lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := by
+  sorry
+
+
 
 -- I think the Schröder equivalence is a consequence of the relation algebra axioms and not a separate axiom in itself.
 /- Schröder equivalence: ∀ x,y ∈ A, x;(x⁻¹;yᶜ)ᶜ ≤ y -/
