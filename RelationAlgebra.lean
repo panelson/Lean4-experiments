@@ -17,7 +17,7 @@ No, they behave differently. E.g., (x ⊔ y)⁻¹ = x⁻¹ ⊔ y⁻¹ but (x ⊔
 
 variable {A : Type u} [BooleanAlgebra A] (x y : A)
 
-theorem meet_eq_bot_iff_le_compl : x ⊓ y = ⊥ ↔ x ≤ yᶜ := by
+lemma meet_eq_bot_iff_le_compl : x ⊓ y = ⊥ ↔ x ≤ yᶜ := by
   constructor
   . intro h
     calc
@@ -32,13 +32,29 @@ theorem meet_eq_bot_iff_le_compl : x ⊓ y = ⊥ ↔ x ≤ yᶜ := by
         _ = ⊥ := by simp
     exact bot_unique h'
 
+lemma bot_compl_eq_top : (⊥ : A)ᶜ = ⊤ := by simp
+
+lemma top_compl_eq_bot : (⊤ : A)ᶜ = ⊥ := by simp
+
+lemma compl_eq : xᶜ = yᶜ ↔ x = y := by
+  constructor
+  . intro h
+    rw [←compl_compl x, h, compl_compl]
+  . intro h
+    rw [h]
+
+lemma join_eq_top_iff_compl_le : x ⊔ y = ⊤ ↔ xᶜ ≤ y := by
+  calc
+    x ⊔ y = ⊤ ↔ (x ⊔ y)ᶜ = ⊤ᶜ  := by rw [compl_eq]
+    _ ↔ xᶜ ⊓ yᶜ = ⊥ := by simp
+    _ ↔ xᶜ ≤ y := by rw [meet_eq_bot_iff_le_compl, compl_compl]
+
 class Comp (A : Type u) where
   comp : A → A → A
 
 infixl:90 " ; "  => Comp.comp
 
 class RelationAlgebra (A : Type u) extends BooleanAlgebra A, Comp A, One A, Inv A where
-
   assoc : ∀ x y z : A, (x ; y) ; z = x ; (y ; z)
   rdist : ∀ x y z : A, (x ⊔ y) ; z = x ; z ⊔ y ; z
   comp_one  : ∀ x : A, x ; 1 = x
@@ -50,6 +66,20 @@ class RelationAlgebra (A : Type u) extends BooleanAlgebra A, Comp A, One A, Inv 
 open RelationAlgebra
 
 variable {A : Type u} [RelationAlgebra A]
+
+/-
+@[simp] lemma rdist' (x y z : A) : (x ⊔ y) ; z = x ; z ⊔ y ; z := rdist x y z
+@[simp] lemma conv_conv' (x : A) : x⁻¹⁻¹ = x := conv_conv x
+@[simp] lemma conv_dist' (x y : A) : (x ⊔ y)⁻¹ = x⁻¹ ⊔ y⁻¹ := conv_dist x y
+@[simp] lemma conv_comp' (x y : A) : (x ; y)⁻¹ = y⁻¹ ; x⁻¹ := conv_comp x y
+@[simp] lemma comp_one' (x : A) : x ; 1 = x := comp_one x
+-/
+
+lemma top_conv : (⊤ : A)⁻¹ = ⊤ := by
+  have : (⊤ : A)⁻¹ = (⊤ ⊔ ⊤⁻¹)⁻¹ := by simp
+  have : (⊤ : A)⁻¹ = ⊤⁻¹ ⊔ ⊤ := by rw [conv_dist, conv_conv] at this; exact this
+  have : (⊤ : A) ≤ ⊤⁻¹ := by rw [left_eq_sup] at this; exact this
+  exact top_unique this
 
 lemma ldist (x y z : A) : x ; (y ⊔ z) = x ; y ⊔ x ; z := by
   calc
@@ -66,13 +96,15 @@ lemma comp_le_comp_right (z : A) {x y : A} (h : x ≤ y) : x ; z ≤ y ; z := by
     _ = (x ⊔ y) ; z := by rw [←rdist]
     _ = y ; z := by simp [h]
 
---theorem inf_le_inf_right (a : α) {b c : α} (h : b ≤ c) : b ⊓ a ≤ c ⊓ a :=
-
 lemma comp_le_comp_left (z : A) {x y : A} (h : x ≤ y) : z ; x ≤ z ; y := by
   calc
     z ; x ≤ z ; x ⊔ z ; y := by simp
     _ = z ; (x ⊔ y) := by rw [←ldist]
     _ = z ; y := by simp [h]
+
+lemma compl_conv_le_conv_compl (x : A) : xᶜ⁻¹ ≤ x⁻¹ᶜ := by
+  have : x ⊔ xᶜ = ⊤ := by simp
+  have : x⁻¹ ⊔ xᶜ⁻¹ = ⊤⁻¹ := by rw [conv_dist] at this
 
 lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
