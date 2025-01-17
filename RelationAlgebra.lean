@@ -102,9 +102,11 @@ lemma comp_le_comp_left (z : A) {x y : A} (h : x ≤ y) : z ; x ≤ z ; y := by
     _ = z ; (x ⊔ y) := by rw [←ldist]
     _ = z ; y := by simp [h]
 
-lemma compl_conv_le_conv_compl (x : A) : xᶜ⁻¹ ≤ x⁻¹ᶜ := by
+lemma compl_conv_le_conv_compl (x : A) : x⁻¹ᶜ ≤ xᶜ⁻¹ := by
   have : x ⊔ xᶜ = ⊤ := by simp
-  have : x⁻¹ ⊔ xᶜ⁻¹ = ⊤⁻¹ := by rw [conv_dist] at this
+  have : (x ⊔ xᶜ)⁻¹ = ⊤⁻¹ := by simp
+  have : x⁻¹ ⊔ xᶜ⁻¹ = ⊤ := by rw [conv_dist, top_conv] at this; exact this
+  rw[join_eq_top_iff_compl_le] at this; exact this
 
 lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
