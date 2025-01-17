@@ -79,7 +79,7 @@ lemma peirce_law (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := b
   intro h
   have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
   have : z ≤ (x ; y)ᶜ := by
-    rw [← compl_le_compl_iff_le, compl_compl] at this; exact this
+    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
   have : x⁻¹ ; z ≤ x⁻¹ ; (x ; y)ᶜ := comp_le_comp_left x⁻¹ this
   have : x⁻¹ ; z ⊓ y ≤ ⊥ := by
     calc
@@ -88,7 +88,17 @@ lemma peirce_law (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := b
       _ = ⊥ := by simp
   exact bot_unique this
   . intro h
-    sorry
+    have : x⁻¹ ; z ≤ yᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+    have : y ≤ (x⁻¹ ; z)ᶜ := by
+      rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+    have : x⁻¹⁻¹ ; y ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ := comp_le_comp_left x⁻¹⁻¹ this
+    have : x⁻¹⁻¹ ; y ⊓ z ≤ ⊥ := by
+      calc
+        x⁻¹⁻¹ ; y ⊓ z ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ ⊓ z := inf_le_inf_right z this
+        _ ≤ zᶜ ⊓ z := inf_le_inf_right z (schroeder x⁻¹ z)
+        _ = ⊥ := by simp
+    have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
+    exact bot_unique this
 
 -- I think the Schröder equivalence is a consequence of the relation algebra axioms and not a separate axiom in itself.
 /- Schröder equivalence: ∀ x,y ∈ A, x;(x⁻¹;yᶜ)ᶜ ≤ y -/
