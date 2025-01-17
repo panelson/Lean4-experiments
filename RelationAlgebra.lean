@@ -123,6 +123,22 @@ lemma conv_compl_eq_compl_conv (x : A) : xᶜ⁻¹ = x⁻¹ᶜ := by
   have : xᶜ⁻¹ ≤ x⁻¹ᶜ⁻¹⁻¹ := conv_le_conv this
   rw [conv_conv] at this; exact le_antisymm this (conv_compl_le_compl_conv x)
 
+lemma one_conv_eq_one : (1 : A)⁻¹ = 1 := by
+  calc
+    (1 : A)⁻¹ = 1⁻¹ ; 1 := by rw [comp_one]
+    _ = (1⁻¹ ; 1)⁻¹⁻¹ := by rw [conv_conv]
+    _ = (1⁻¹ ; 1⁻¹⁻¹)⁻¹ := by rw [conv_comp]
+    _ = (1⁻¹ ; 1)⁻¹ := by rw [conv_conv]
+    _ = 1 := by rw [comp_one, conv_conv]
+
+lemma one_comp (x : A) : 1 ; x = x := by
+  calc
+    1 ; x = (1 ; x)⁻¹⁻¹ := by rw [conv_conv]
+    _ = (x⁻¹ ; 1⁻¹)⁻¹ := by rw [conv_comp]
+    _ = (x⁻¹ ; 1)⁻¹ := by rw [one_conv_eq_one]
+    _ = x⁻¹⁻¹ := by rw [comp_one]
+    _ = x := by rw [conv_conv]
+
 lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
   intro h
