@@ -54,6 +54,9 @@ class Comp (A : Type u) where
 
 infixl:90 " ; "  => Comp.comp
 
+/-- An (abstract) relation algebra, as defined by Tarski [1942], is a
+Boolean algebra with three additional operation ; ⁻¹ 1 that satisfy
+the following additional equational axioms -/
 class RelationAlgebra (A : Type u) extends BooleanAlgebra A, Comp A, One A, Inv A where
   assoc : ∀ x y z : A, (x ; y) ; z = x ; (y ; z)
   rdist : ∀ x y z : A, (x ⊔ y) ; z = x ; z ⊔ y ; z
@@ -67,7 +70,7 @@ open RelationAlgebra
 
 variable {A : Type u} [RelationAlgebra A]
 
-/-
+/- these simp lemmas are not needed so far
 @[simp] lemma rdist' (x y z : A) : (x ⊔ y) ; z = x ; z ⊔ y ; z := rdist x y z
 @[simp] lemma conv_conv' (x : A) : x⁻¹⁻¹ = x := conv_conv x
 @[simp] lemma conv_dist' (x y : A) : (x ⊔ y)⁻¹ = x⁻¹ ⊔ y⁻¹ := conv_dist x y
@@ -102,11 +105,23 @@ lemma comp_le_comp_left (z : A) {x y : A} (h : x ≤ y) : z ; x ≤ z ; y := by
     _ = z ; (x ⊔ y) := by rw [←ldist]
     _ = z ; y := by simp [h]
 
-lemma compl_conv_le_conv_compl (x : A) : x⁻¹ᶜ ≤ xᶜ⁻¹ := by
+lemma conv_le_conv {x y : A} (h : x ≤ y) : x⁻¹ ≤ y⁻¹ := by
+  calc
+    x⁻¹ ≤ x⁻¹ ⊔ y⁻¹ := by simp
+    _ = (x ⊔ y)⁻¹ := by rw [←conv_dist]
+    _ = y⁻¹ := by simp [h]
+
+lemma conv_compl_le_compl_conv (x : A) : x⁻¹ᶜ ≤ xᶜ⁻¹ := by
   have : x ⊔ xᶜ = ⊤ := by simp
   have : (x ⊔ xᶜ)⁻¹ = ⊤⁻¹ := by simp
   have : x⁻¹ ⊔ xᶜ⁻¹ = ⊤ := by rw [conv_dist, top_conv] at this; exact this
   rw[join_eq_top_iff_compl_le] at this; exact this
+
+lemma conv_compl_eq_compl_conv (x : A) : xᶜ⁻¹ = x⁻¹ᶜ := by
+  have : x⁻¹⁻¹ᶜ ≤ x⁻¹ᶜ⁻¹ := conv_compl_le_compl_conv x⁻¹
+  have : xᶜ ≤ x⁻¹ᶜ⁻¹ := by rw [conv_conv] at this; exact this
+  have : xᶜ⁻¹ ≤ x⁻¹ᶜ⁻¹⁻¹ := conv_le_conv this
+  rw [conv_conv] at this; exact le_antisymm this (conv_compl_le_compl_conv x)
 
 lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
