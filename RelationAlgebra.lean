@@ -38,10 +38,10 @@ lemma top_compl_eq_bot : (⊤ : A)ᶜ = ⊥ := by simp
 
 lemma compl_eq : xᶜ = yᶜ ↔ x = y := by
   constructor
-  . intro h
-    rw [←compl_compl x, h, compl_compl]
-  . intro h
-    rw [h]
+  intro h
+  rw [←compl_compl x, h, compl_compl]
+  intro h
+  rw [h]
 
 lemma join_eq_top_iff_compl_le : x ⊔ y = ⊤ ↔ xᶜ ≤ y := by
   calc
@@ -139,6 +139,15 @@ lemma one_comp (x : A) : 1 ; x = x := by
     _ = x⁻¹⁻¹ := by rw [comp_one]
     _ = x := by rw [conv_conv]
 
+lemma schroeder' (x y : A) : (x ; y)ᶜ ; y⁻¹  ≤ xᶜ := by
+  calc
+    (x ; y)ᶜ ; y⁻¹ = ((x ; y)ᶜ ; y⁻¹)⁻¹⁻¹ := by rw [conv_conv]
+    _ = (y⁻¹⁻¹ ; (x ; y)ᶜ⁻¹)⁻¹ := by rw [conv_comp]
+    _ = (y⁻¹⁻¹ ; (x ; y)⁻¹ᶜ)⁻¹ := by rw [←conv_compl_eq_compl_conv]
+    _ = (y⁻¹⁻¹ ; (y⁻¹ ; x⁻¹)ᶜ)⁻¹ := by rw [←conv_comp]
+    _ ≤ x⁻¹ᶜ⁻¹ := conv_le_conv (schroeder y⁻¹ x⁻¹)
+    _ = xᶜ := by rw [←conv_compl_eq_compl_conv,conv_conv]
+
 lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
   intro h
@@ -152,27 +161,18 @@ lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := 
       _ ≤ yᶜ ⊓ y := inf_le_inf_right y (schroeder x y)
       _ = ⊥ := by simp
   exact bot_unique this
-  . intro h
-    have : x⁻¹ ; z ≤ yᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
-    have : y ≤ (x⁻¹ ; z)ᶜ := by
-      rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
-    have : x⁻¹⁻¹ ; y ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ := comp_le_comp_left x⁻¹⁻¹ this
-    have : x⁻¹⁻¹ ; y ⊓ z ≤ ⊥ := by
+  intro h
+  have : x⁻¹ ; z ≤ yᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+  have : y ≤ (x⁻¹ ; z)ᶜ := by
+    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+  have : x⁻¹⁻¹ ; y ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ := comp_le_comp_left x⁻¹⁻¹ this
+  have : x⁻¹⁻¹ ; y ⊓ z ≤ ⊥ := by
       calc
         x⁻¹⁻¹ ; y ⊓ z ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ ⊓ z := inf_le_inf_right z this
         _ ≤ zᶜ ⊓ z := inf_le_inf_right z (schroeder x⁻¹ z)
         _ = ⊥ := by simp
-    have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
-    exact bot_unique this
-
-lemma schroeder' (x y : A) : (x ; y)ᶜ ; y⁻¹  ≤ xᶜ := by
-  calc
-    (x ; y)ᶜ ; y⁻¹ = ((x ; y)ᶜ ; y⁻¹)⁻¹⁻¹ := by rw [conv_conv]
-    _ = (y⁻¹⁻¹ ; (x ; y)ᶜ⁻¹)⁻¹ := by rw [conv_comp]
-    _ = (y⁻¹⁻¹ ; (x ; y)⁻¹ᶜ)⁻¹ := by rw [←conv_compl_eq_compl_conv]
-    _ = (y⁻¹⁻¹ ; (y⁻¹ ; x⁻¹)ᶜ)⁻¹ := by rw [←conv_comp]
-    _ ≤ x⁻¹ᶜ⁻¹ := conv_le_conv (schroeder y⁻¹ x⁻¹)
-    _ = xᶜ := by rw [←conv_compl_eq_compl_conv,conv_conv]
+  have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
+  exact bot_unique this
 
 /- Try to prove this law in a way that is similar to pierce_law1 using schroeder' -/
 lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := by
@@ -188,21 +188,18 @@ lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := 
       _ ≤ xᶜ ⊓ x := inf_le_inf_right x (schroeder' x y)
       _ = ⊥ := by simp
   exact bot_unique this
-
-  intro h
-  have : z ; y⁻¹ ≤ xᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
-  have : x ≤ (z ; y⁻¹)ᶜ := by
-    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
-  have : x ; y ≤ (z ; y⁻¹)ᶜ ; y := comp_le_comp_right y this
-  have : x ; y ⊓ z ≤ ⊥ := by
-    calc
-      x ; y ⊓ z ≤ (z ; y⁻¹)ᶜ ; y ⊓ z := inf_le_inf_right z this
-      _ ≤ zᶜ ⊓ z := by
-      -- I dont know how to simplify y⁻¹⁻¹ to y, I probably am not using conv_conv correctly
-        rw [←conv_conv y] at (schroeder' z y⁻¹)
-        exact inf_le_inf_right z (schroeder' z y⁻¹)
-      _ = ⊥ := by simp
-  exact bot_unique this
+  . intro h
+    have : z ; y⁻¹ ≤ xᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+    have : x ≤ (z ; y⁻¹)ᶜ := by
+      rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+    have : x ; y⁻¹⁻¹ ≤ (z ; y⁻¹)ᶜ ; y⁻¹⁻¹ := comp_le_comp_right y⁻¹⁻¹ this
+    have : x ; y⁻¹⁻¹ ⊓ z ≤ ⊥ := by
+      calc
+        x ; y⁻¹⁻¹ ⊓ z ≤ (z ; y⁻¹)ᶜ ; y⁻¹⁻¹ ⊓ z := inf_le_inf_right z this
+        _ ≤ zᶜ ⊓ z := inf_le_inf_right z (schroeder' z y⁻¹)
+        _ = ⊥ := by simp
+    have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
+    exact bot_unique this
 
 
 
