@@ -198,7 +198,7 @@ lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := 
     calc
       x ; y ⊓ z ≤ (z ; y⁻¹)ᶜ ; y ⊓ z := inf_le_inf_right z this
       _ ≤ zᶜ ⊓ z := by
-      -- I dont know how to simplify y-1-1 to y, I probably am not using conv_conv correctly
+      -- I dont know how to simplify y⁻¹⁻¹ to y, I probably am not using conv_conv correctly
         rw [←conv_conv y] at (schroeder' z y⁻¹)
         exact inf_le_inf_right z (schroeder' z y⁻¹)
       _ = ⊥ := by simp
