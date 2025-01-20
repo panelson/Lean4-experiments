@@ -176,7 +176,33 @@ lemma schroeder' (x y : A) : (x ; y)ᶜ ; y⁻¹  ≤ xᶜ := by
 
 /- Try to prove this law in a way that is similar to pierce_law1 using schroeder' -/
 lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := by
-  sorry
+  constructor
+  intro h
+  have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+  have : z ≤ (x ; y)ᶜ := by
+    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+  have : z ; y⁻¹ ≤ (x ; y)ᶜ ; y⁻¹ := comp_le_comp_right y⁻¹ this
+  have : z ; y⁻¹ ⊓ x ≤ ⊥ := by
+    calc
+      z ; y⁻¹ ⊓ x ≤ (x ; y)ᶜ ; y⁻¹ ⊓ x := inf_le_inf_right x this
+      _ ≤ xᶜ ⊓ x := inf_le_inf_right x (schroeder' x y)
+      _ = ⊥ := by simp
+  exact bot_unique this
+
+  intro h
+  have : z ; y⁻¹ ≤ xᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+  have : x ≤ (z ; y⁻¹)ᶜ := by
+    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+  have : x ; y ≤ (z ; y⁻¹)ᶜ ; y := comp_le_comp_right y this
+  have : x ; y ⊓ z ≤ ⊥ := by
+    calc
+      x ; y ⊓ z ≤ (z ; y⁻¹)ᶜ ; y ⊓ z := inf_le_inf_right z this
+      _ ≤ zᶜ ⊓ z := by
+      -- I dont know how to simplify y-1-1 to y, I probably am not using conv_conv correctly
+        rw [←conv_conv y] at (schroeder' z y⁻¹)
+        exact inf_le_inf_right z (schroeder' z y⁻¹)
+      _ = ⊥ := by simp
+  exact bot_unique this
 
 
 
