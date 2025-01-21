@@ -19,13 +19,13 @@ variable {A : Type u} [BooleanAlgebra A] (x y : A)
 
 lemma meet_eq_bot_iff_le_compl : x ⊓ y = ⊥ ↔ x ≤ yᶜ := by
   constructor
-  . intro h
+  · intro h
     calc
       x = x ⊓ y ⊔ x ⊓ yᶜ := by simp
       _ = ⊥ ⊔ x ⊓ yᶜ := by rw [h]
       _ = x ⊓ yᶜ := by rw [bot_sup_eq]
       _ ≤ yᶜ := by simp
-  . intro h
+  · intro h
     have h' : x ⊓ y ≤ ⊥ := by
       calc
         x ⊓ y ≤ yᶜ ⊓ y := inf_le_inf_right y h
@@ -150,45 +150,45 @@ lemma schroeder' (x y : A) : (x ; y)ᶜ ; y⁻¹  ≤ xᶜ := by
 
 lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := by
   constructor
-  intro h
-  have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
-  have : z ≤ (x ; y)ᶜ := by
-    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
-  have : x⁻¹ ; z ≤ x⁻¹ ; (x ; y)ᶜ := comp_le_comp_left x⁻¹ this
-  have : x⁻¹ ; z ⊓ y ≤ ⊥ := by
-    calc
-      x⁻¹ ; z ⊓ y ≤ x⁻¹ ; (x ; y)ᶜ ⊓ y := inf_le_inf_right y this
-      _ ≤ yᶜ ⊓ y := inf_le_inf_right y (schroeder x y)
-      _ = ⊥ := by simp
-  exact bot_unique this
-  intro h
-  have : x⁻¹ ; z ≤ yᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
-  have : y ≤ (x⁻¹ ; z)ᶜ := by
-    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
-  have : x⁻¹⁻¹ ; y ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ := comp_le_comp_left x⁻¹⁻¹ this
-  have : x⁻¹⁻¹ ; y ⊓ z ≤ ⊥ := by
+  · intro h
+    have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+    have : z ≤ (x ; y)ᶜ := by
+      rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+    have : x⁻¹ ; z ≤ x⁻¹ ; (x ; y)ᶜ := comp_le_comp_left x⁻¹ this
+    have : x⁻¹ ; z ⊓ y ≤ ⊥ := by
       calc
-        x⁻¹⁻¹ ; y ⊓ z ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ ⊓ z := inf_le_inf_right z this
-        _ ≤ zᶜ ⊓ z := inf_le_inf_right z (schroeder x⁻¹ z)
+        x⁻¹ ; z ⊓ y ≤ x⁻¹ ; (x ; y)ᶜ ⊓ y := inf_le_inf_right y this
+        _ ≤ yᶜ ⊓ y := inf_le_inf_right y (schroeder x y)
         _ = ⊥ := by simp
-  have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
-  exact bot_unique this
+    exact bot_unique this
+  · intro h
+    have : x⁻¹ ; z ≤ yᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+    have : y ≤ (x⁻¹ ; z)ᶜ := by
+      rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+    have : x⁻¹⁻¹ ; y ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ := comp_le_comp_left x⁻¹⁻¹ this
+    have : x⁻¹⁻¹ ; y ⊓ z ≤ ⊥ := by
+        calc
+          x⁻¹⁻¹ ; y ⊓ z ≤ x⁻¹⁻¹ ; (x⁻¹ ; z)ᶜ ⊓ z := inf_le_inf_right z this
+          _ ≤ zᶜ ⊓ z := inf_le_inf_right z (schroeder x⁻¹ z)
+          _ = ⊥ := by simp
+    have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
+    exact bot_unique this
 
 /- Try to prove this law in a way that is similar to pierce_law1 using schroeder' -/
 lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := by
   constructor
-  intro h
-  have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
-  have : z ≤ (x ; y)ᶜ := by
-    rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
-  have : z ; y⁻¹ ≤ (x ; y)ᶜ ; y⁻¹ := comp_le_comp_right y⁻¹ this
-  have : z ; y⁻¹ ⊓ x ≤ ⊥ := by
-    calc
-      z ; y⁻¹ ⊓ x ≤ (x ; y)ᶜ ; y⁻¹ ⊓ x := inf_le_inf_right x this
-      _ ≤ xᶜ ⊓ x := inf_le_inf_right x (schroeder' x y)
-      _ = ⊥ := by simp
-  exact bot_unique this
-  . intro h
+  · intro h
+    have : x ; y ≤ zᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
+    have : z ≤ (x ; y)ᶜ := by
+      rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
+    have : z ; y⁻¹ ≤ (x ; y)ᶜ ; y⁻¹ := comp_le_comp_right y⁻¹ this
+    have : z ; y⁻¹ ⊓ x ≤ ⊥ := by
+      calc
+        z ; y⁻¹ ⊓ x ≤ (x ; y)ᶜ ; y⁻¹ ⊓ x := inf_le_inf_right x this
+        _ ≤ xᶜ ⊓ x := inf_le_inf_right x (schroeder' x y)
+        _ = ⊥ := by simp
+    exact bot_unique this
+  · intro h
     have : z ; y⁻¹ ≤ xᶜ := by rw [meet_eq_bot_iff_le_compl] at h; exact h
     have : x ≤ (z ; y⁻¹)ᶜ := by
       rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
@@ -200,6 +200,33 @@ lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := 
         _ = ⊥ := by simp
     have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
     exact bot_unique this
+
+instance : Comp A where
+  comp := λ x y => x ; y
+
+
+class Ternary (S : Type u) where
+  ternary : S → S → S → Prop
+
+notation "R "  => Ternary.ternary
+
+class Unary (S : Type u) where
+  unary : S → Prop
+
+prefix:90 "I "  => Unary.unary
+
+class AtomStructure (S : Type u) extends Ternary S, Inv S, Unary S where
+  peirce1 : ∀ x y z : S, R x y z ↔ R x⁻¹ z y
+  peirce2 : ∀ x y z : S, R x y z ↔ R z y⁻¹ x
+  identity : ∀ x y : S, x = y ↔ ∃ e : S, I e ∧ R x e y
+  assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
+
+open AtomStructure
+
+variable {S : Type u} [AtomStructure S]
+
+lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
+  sorry
 
 
 
