@@ -1,6 +1,7 @@
 import Mathlib.Order.BooleanAlgebra
 import Mathlib.Order.Lattice
 import Mathlib.Algebra.Group.Defs
+--import Mathlib.Logic.Basic
 
 /- Extends Boolean algebra (A, ⊔, ᶜ, ⊥) where A is a non-empty set of elements, ⊔ is the binary operation join,
 ᶜ is the unary operation complement, and ⊥ is the bottom element of A.
@@ -226,8 +227,9 @@ open AtomStructure
 variable {S : Type u} [AtomStructure S]
 
 lemma conv_conv (x : S) : x⁻¹⁻¹ = x := by
-
-
+  have h : ∃ e : S, I e ∧ R x e x := by rw [←identity]
+  cases h with
+  | intro e h' => rw [peirce1] at h'; rw [peirce1] at h'; exact (identity x⁻¹⁻¹ x).mpr ⟨e, h'⟩
 
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   sorry
