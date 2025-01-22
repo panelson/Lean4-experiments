@@ -225,6 +225,10 @@ open AtomStructure
 
 variable {S : Type u} [AtomStructure S]
 
+lemma conv_conv (x : S) : x⁻¹⁻¹ = x := by
+
+
+
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   sorry
 
