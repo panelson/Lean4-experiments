@@ -58,6 +58,22 @@ infixl:90 " ; "  => Comp.comp
 /-- An (abstract) relation algebra, as defined by Tarski [1942], is a
 Boolean algebra with three additional operation ; ⁻¹ 1 that satisfy
 the following additional equational axioms -/
+
+class NonassociativeRA (A : Type u) extends BooleanAlgebra A, Comp A, One A, Inv A where
+  comp_one  : ∀ x : A, x ; 1 = x
+  one_comp  : ∀ x : A, 1 ; x = x
+  peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥
+  peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥
+
+class WeaklyassociativeRA (A : Type u) extends NonassociativeRA A where
+  assoc : ∀ x : A, (1 ⊓ x ; ⊤) ; ⊤ = (1 ⊓ x) ; ⊤
+
+class SemiassociativeRA (A : Type u) extends NonassociativeRA A where
+  assoc : ∀ x : A, (x ; ⊤) ; ⊤ = x ; ⊤
+
+class RMRelationAlgebra (A : Type u) extends NonassociativeRA A where
+  assoc : ∀ x y z : A, (x ; y) ; z = x ; (y ; z)
+
 class RelationAlgebra (A : Type u) extends BooleanAlgebra A, Comp A, One A, Inv A where
   assoc : ∀ x y z : A, (x ; y) ; z = x ; (y ; z)
   rdist : ∀ x y z : A, (x ⊔ y) ; z = x ; z ⊔ y ; z
@@ -202,8 +218,31 @@ lemma peirce_law2 (x y z : A) : x ; y ⊓ z = ⊥ ↔ z ; y⁻¹ ⊓ x = ⊥ := 
     have : x ; y ⊓ z ≤ ⊥ := by rw [conv_conv] at this; exact this
     exact bot_unique this
 
-instance : Comp A where
-  comp := λ x y => x ; y
+/- Full relation algebras Re(X) = (P(X²), ∪, ∩, \, ∅, X², ;, ⁻¹, id) as instance of
+the class RelationAlgebra
+
+P(X²) is the power set of X², ∪ is the union of sets, ∩ is the intersection of sets, \ is the set difference,
+
+Set (X x X)
+-/
+
+variable (X : Type u) (R : Set (X × X))
+
+instance : RelationAlgebra (Set (X × X)) where
+  comp R S := { (x, y) | ∃ z, (x, z) ∈ R ∧ (z, y) ∈ S }
+  one := { (x, y) | x = y }
+  inv R := { (y, x) | (x, y) ∈ R }
+  bot := ∅
+  top := sorry --X × X
+  sup R S := R ∪ S
+  inf R S := R ∩ S
+  compl R := (X × X) \ R
+  le_refl := by sorry
+  assoc x y z := by sorry
+  rdist x y z := by sorry
+
+--instance : Comp A where
+-- comp := λ x y => x ; y
 
 
 class Ternary (S : Type u) where
@@ -219,7 +258,7 @@ prefix:90 "I "  => Unary.unary
 class AtomStructure (S : Type u) extends Ternary S, Inv S, Unary S where
   peirce1 : ∀ x y z : S, R x y z ↔ R x⁻¹ z y
   peirce2 : ∀ x y z : S, R x y z ↔ R z y⁻¹ x
-  identity : ∀ x y : S, x = y ↔ ∃ e : S, I e ∧ R x e y
+  identity : ∀ x y : S, x = y ↔ ∃ u : S, I u ∧ R x u y
   assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
 
 open AtomStructure
@@ -230,6 +269,31 @@ lemma conv_conv (x : S) : x⁻¹⁻¹ = x := by
   have h : ∃ e : S, I e ∧ R x e x := by rw [←identity]
   cases h with
   | intro e h' => rw [peirce1] at h'; rw [peirce1] at h'; exact (identity x⁻¹⁻¹ x).mpr ⟨e, h'⟩
+
+/- define atom structure with atoms e, a, b and relations
+  R e e e, R e a a, R e b b,
+  R a e a, R a a b, R a b e,
+  R b e b, R b a e, R b b a -/
+
+/- The group Z_3 as atom structure -/
+inductive Z₃ : Type u | e : Z₃ | a : Z₃ | b : Z₃
+open Z₃
+def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
+| e, e, e => True | e, a, a => True | e, b, b => True
+| a, e, a => True | a, a, b => True | a, b, e => True
+| b, e, b => True | b, a, e => True | b, b, a => True
+| _, _, _ => False
+def Z₃.inv : Z₃ → Z₃ := fun | e => e | a => b | b => a
+def Z₃.unary : Z₃ → Prop := fun | e => True | _ => False
+
+instance : AtomStructure (Z₃) where
+  ternary x y z := Z₃.ternary x y z
+  unary x := Z₃.unary x
+  inv x := Z₃.inv x
+  peirce1 x y z := by cases x <;> cases y <;> cases z <;> rfl
+  peirce2 x y z := by cases x <;> cases y <;> cases z <;> rfl
+  identity x y := by cases x <;> cases y <;> split <;> rfl
+  assoc u x y z w := by cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> rfl
 
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   sorry
