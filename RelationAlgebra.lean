@@ -233,10 +233,10 @@ instance : RelationAlgebra (Set (X × X)) where
   one := { (x, y) | x = y }
   inv R := { (y, x) | (x, y) ∈ R }
   bot := ∅
-  top := sorry --X × X
+  top := Set.univ
   sup R S := R ∪ S
   inf R S := R ∩ S
-  compl R := (X × X) \ R
+  compl R := Set.univ \ R
   le_refl := by sorry
   assoc x y z := by sorry
   rdist x y z := by sorry
@@ -244,6 +244,7 @@ instance : RelationAlgebra (Set (X × X)) where
 --instance : Comp A where
 -- comp := λ x y => x ; y
 
+--#check
 
 class Ternary (S : Type u) where
   ternary : S → S → S → Prop
@@ -258,7 +259,9 @@ prefix:90 "I "  => Unary.unary
 class AtomStructure (S : Type u) extends Ternary S, Inv S, Unary S where
   peirce1 : ∀ x y z : S, R x y z ↔ R x⁻¹ z y
   peirce2 : ∀ x y z : S, R x y z ↔ R z y⁻¹ x
-  identity : ∀ x y : S, x = y ↔ ∃ u : S, I u ∧ R x u y
+  id : ∃ x : S, I x
+  identity1 : ∀ x y u : S, I u ∧ R x u y → x = y
+  identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R x u y
   assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
 
 open AtomStructure
@@ -286,17 +289,32 @@ def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
 def Z₃.inv : Z₃ → Z₃ := fun | e => e | a => b | b => a
 def Z₃.unary : Z₃ → Prop := fun | e => True | _ => False
 
+open Classical -- needed for the next example
+example : False → e = a := by trivial
+example : ∃ x : Z₃, x = e → a = a := by (exists e <;> intro; trivial)
+
+set_option diagnostics true
+example : ∃ x : Z₃, unary x := by exists e
+example : True → e = e := by intro h; exact rfl
+example : Z₃.ternary e e e := trivial
+
+
 instance : AtomStructure (Z₃) where
   ternary x y z := Z₃.ternary x y z
   unary x := Z₃.unary x
   inv x := Z₃.inv x
+  id := by exists e
   peirce1 x y z := by cases x <;> cases y <;> cases z <;> rfl
   peirce2 x y z := by cases x <;> cases y <;> cases z <;> rfl
-  identity x y := by cases x <;> cases y <;> split <;> rfl
+  identity1 x y u := by cases x <;> cases y <;> cases u <;> aesop
+  identity2 x y := by cases x <;> cases y <;> (exists e <;> intro; trivial)
   assoc u x y z w := by cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> rfl
 
-lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
+lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
   sorry
+
+lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
+  sorry  -- this proof will use lemma peirce3
 
 
 
