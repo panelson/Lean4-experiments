@@ -1,6 +1,7 @@
 import Mathlib.Logic.Basic
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Data.ZMod.Defs
+import Mathlib.Order.ModularLattice
 
 #check CommRing (ZMod 3)
 
@@ -159,3 +160,72 @@ end Z₂
 
 -- In a comment at the top of Prelude.lean (left over from Lean 3?):
 --show T' from e
+
+-- Define the pentagon lattice N₅
+def N₅ : Type := Fin 5
+
+-- Define the lattice structure on N₅
+instance : Lattice N₅ where
+  le a b := a = 0 ∨ b = 1 ∨ (a = 2 ∧ b = 2) ∨ (a = 3 ∧ b = 3) ∨ (a = 4 ∧ b = 4)
+  le_refl a := by cases a <;> simp
+  le_trans a b c hab hbc := by cases a <;> cases b <;> cases c <;> simp [*]
+  le_antisymm a b hab hba := by cases a <;> cases b <;> simp [*]
+  sup a b :=
+    if a = 0 then b
+    else if b = 0 then a
+    else if a = 1 ∨ b = 1 then 1
+    else if a = 2 ∨ b = 2 then 2
+    else if a = 3 ∨ b = 3 then 3
+    else 4
+  inf a b :=
+    if a = 1 then b
+    else if b = 1 then a
+    else if a = 0 ∨ b = 0 then 0
+    else if a = 2 ∨ b = 2 then 2
+    else if a = 3 ∨ b = 3 then 3
+    else 4
+
+-- Prove that N₅ is non-modular
+lemma N₅_non_modular : ¬ IsModularLattice N₅ := by
+  intro h
+  have h_mod : ∀ x y z : N₅, x ≤ z → (x ⊔ (y ⊓ z) = (x ⊔ y) ⊓ z) := h.modular_law
+  specialize h_mod 0 2 1 (by simp)
+  simp at h_mod
+  contradiction
+
+-- Main theorem: If a lattice is not modular, it contains a copy of N₅
+theorem contains_N₅_if_not_modular (L : Type*) [Lattice L] :
+    ¬ IsModularLattice L → ∃ (f : N₅ → L), Function.Injective f ∧ ∀ a b : N₅, a ≤ b ↔ f a ≤ f b := by
+  intro h_not_mod
+  -- Use the fact that non-modularity implies the existence of a pentagon sublattice
+  obtain ⟨x, y, z, hxz, h_neq⟩ := exists_three_elements_violating_modular_law h_not_mod
+  let a := x ⊔ (y ⊓ z)
+  let b := (x ⊔ y) ⊓ z
+  let c := y
+  let zero := y ⊓ z
+  let one := x ⊔ y
+  -- Define the embedding f : N₅ → L
+  let f : N₅ → L := λ i =>
+    match i with
+    | 0 => zero
+    | 1 => a
+    | 2 => b
+    | 3 => c
+    | 4 => one
+  -- Prove that f is injective and preserves order
+  refine ⟨f, ?_, ?_⟩
+  · -- Injectivity
+    intro i j hf
+    cases i <;> cases j <;> simp [f] at hf <;> try contradiction
+    all_goals rfl
+  · -- Order preservation
+    intro i j
+    cases i <;> cases j <;> simp [f, zero, a, b, c, one]
+    -- Prove the necessary inequalities and equalities
+    all_goals
+      try apply le_refl
+      try apply le_sup_left
+      try apply le_sup_right
+      try apply inf_le_left
+      try apply inf_le_right
+      try assumption

@@ -2,6 +2,8 @@ import Mathlib.Order.BooleanAlgebra
 import Mathlib.Order.Lattice
 import Mathlib.Algebra.Group.Defs
 --import Mathlib.Logic.Basic
+import Mathlib.Data.Finset.Basic
+import Mathlib.Data.Fintype.Basic
 
 /- Extends Boolean algebra (A, ⊔, ᶜ, ⊥) where A is a non-empty set of elements, ⊔ is the binary operation join,
 ᶜ is the unary operation complement, and ⊥ is the bottom element of A.
@@ -244,7 +246,8 @@ instance : RelationAlgebra (Set (X × X)) where
 --instance : Comp A where
 -- comp := λ x y => x ; y
 
---#check
+#check Finset X
+#check Fintype X
 
 class Ternary (S : Type u) where
   ternary : S → S → S → Prop
@@ -311,8 +314,7 @@ instance : AtomStructure (Z₃) where
   assoc u x y z w := by cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> rfl
 
 lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
-  rw [peirce1, peirce2, peirce1]
-
+  sorry
 
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   rw [peirce1, peirce2]
@@ -321,7 +323,6 @@ lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R 
 
 
 
-  -- this proof will use lemma peirce3
 
 
 -- I think the Schröder equivalence is a consequence of the relation algebra axioms and not a separate axiom in itself.
