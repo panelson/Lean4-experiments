@@ -311,11 +311,17 @@ instance : AtomStructure (Z₃) where
   assoc u x y z w := by cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> rfl
 
 lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
-  sorry
+  rw [peirce1, peirce2, peirce1]
+
 
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
-  sorry  -- this proof will use lemma peirce3
+  rw [peirce1, peirce2]
+  intro h
+  have h : R y z⁻¹ v ∧ R x⁻¹ v⁻¹ w := by sorry
 
+
+
+  -- this proof will use lemma peirce3
 
 
 -- I think the Schröder equivalence is a consequence of the relation algebra axioms and not a separate axiom in itself.
