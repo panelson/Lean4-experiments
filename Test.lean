@@ -2,6 +2,31 @@ import Mathlib.Logic.Basic
 import Mathlib.Algebra.Group.Defs
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Order.ModularLattice
+import Mathlib.Data.Finset.Basic
+import Mathlib.Order.Basic
+import Mathlib.Order.Lattice
+
+#check (List.range 5).map
+
+def permutations {α : Type} (l : List α) : List (List α) :=
+  match l with
+  | [] => [[]]
+  | x :: xs =>
+    List.flatMap (permutations xs) fun perm =>
+      List.map (fun i => perm.insertIdx i x) (List.range (xs.length + 1))
+
+variable (α : ℕ)
+
+#eval permutations [1, 2, 3, 4]
+
+def allPermutations (n : Nat) : List (List Nat) :=
+  permutations (List.range n)
+
+variable (n : ℕ)
+
+#eval allPermutations 3
+#eval allPermutations 4
+
 
 #check CommRing (ZMod 3)
 
@@ -165,67 +190,247 @@ end Z₂
 def N₅ : Type := Fin 5
 
 -- Define the lattice structure on N₅
-instance : Lattice N₅ where
-  le a b := a = 0 ∨ b = 1 ∨ (a = 2 ∧ b = 2) ∨ (a = 3 ∧ b = 3) ∨ (a = 4 ∧ b = 4)
-  le_refl a := by cases a <;> simp
-  le_trans a b c hab hbc := by cases a <;> cases b <;> cases c <;> simp [*]
-  le_antisymm a b hab hba := by cases a <;> cases b <;> simp [*]
-  sup a b :=
-    if a = 0 then b
-    else if b = 0 then a
-    else if a = 1 ∨ b = 1 then 1
-    else if a = 2 ∨ b = 2 then 2
-    else if a = 3 ∨ b = 3 then 3
-    else 4
-  inf a b :=
-    if a = 1 then b
-    else if b = 1 then a
-    else if a = 0 ∨ b = 0 then 0
-    else if a = 2 ∨ b = 2 then 2
-    else if a = 3 ∨ b = 3 then 3
-    else 4
 
--- Prove that N₅ is non-modular
-lemma N₅_non_modular : ¬ IsModularLattice N₅ := by
-  intro h
-  have h_mod : ∀ x y z : N₅, x ≤ z → (x ⊔ (y ⊓ z) = (x ⊔ y) ⊓ z) := h.modular_law
-  specialize h_mod 0 2 1 (by simp)
-  simp at h_mod
-  contradiction
+-- Define the elements of the pentagon lattice
+inductive Pentagon where | bot | a | b | c | top
 
--- Main theorem: If a lattice is not modular, it contains a copy of N₅
-theorem contains_N₅_if_not_modular (L : Type*) [Lattice L] :
-    ¬ IsModularLattice L → ∃ (f : N₅ → L), Function.Injective f ∧ ∀ a b : N₅, a ≤ b ↔ f a ≤ f b := by
-  intro h_not_mod
-  -- Use the fact that non-modularity implies the existence of a pentagon sublattice
-  obtain ⟨x, y, z, hxz, h_neq⟩ := exists_three_elements_violating_modular_law h_not_mod
-  let a := x ⊔ (y ⊓ z)
-  let b := (x ⊔ y) ⊓ z
-  let c := y
-  let zero := y ⊓ z
-  let one := x ⊔ y
-  -- Define the embedding f : N₅ → L
-  let f : N₅ → L := λ i =>
-    match i with
-    | 0 => zero
-    | 1 => a
-    | 2 => b
-    | 3 => c
-    | 4 => one
-  -- Prove that f is injective and preserves order
-  refine ⟨f, ?_, ?_⟩
-  · -- Injectivity
-    intro i j hf
-    cases i <;> cases j <;> simp [f] at hf <;> try contradiction
-    all_goals rfl
-  · -- Order preservation
-    intro i j
-    cases i <;> cases j <;> simp [f, zero, a, b, c, one]
-    -- Prove the necessary inequalities and equalities
-    all_goals
-      try apply le_refl
-      try apply le_sup_left
-      try apply le_sup_right
-      try apply inf_le_left
-      try apply inf_le_right
-      try assumption
+-- Define the partial order on the pentagon lattice
+instance : PartialOrder Pentagon where
+  le := fun x y =>
+    match x, y with
+    | Pentagon.bot, _ => True
+    | _, Pentagon.top => True
+    | Pentagon.a, Pentagon.a => True
+    | Pentagon.b, Pentagon.b => True
+    | Pentagon.c, Pentagon.c => True
+    | Pentagon.a, Pentagon.c => True
+    | Pentagon.b, Pentagon.c => True
+    | _, _ => False
+  le_refl := by
+    intro x
+    cases x <;> simp
+  le_trans := by
+    intro x y z
+    cases x <;> cases y <;> cases z <;> simp
+  le_antisymm := by
+    intro x y
+    cases x <;> cases y <;> simp
+
+-- Define the join (least upper bound) operation
+instance : Sup Pentagon where
+  sup := fun x y =>
+    match x, y with
+    | Pentagon.bot, z => z
+    | z, Pentagon.bot => z
+    | Pentagon.top, _ => Pentagon.top
+    | _, Pentagon.top => Pentagon.top
+    | Pentagon.a, Pentagon.a => Pentagon.a
+    | Pentagon.b, Pentagon.b => Pentagon.b
+    | Pentagon.c, Pentagon.c => Pentagon.c
+    | Pentagon.a, Pentagon.b => Pentagon.c
+    | Pentagon.b, Pentagon.a => Pentagon.c
+    | Pentagon.a, Pentagon.c => Pentagon.c
+    | Pentagon.c, Pentagon.a => Pentagon.c
+    | Pentagon.b, Pentagon.c => Pentagon.c
+    | Pentagon.c, Pentagon.b => Pentagon.c
+
+-- Define the meet (greatest lower bound) operation
+instance : Inf Pentagon where
+  inf := fun x y =>
+    match x, y with
+    | Pentagon.top, z => z
+    | z, Pentagon.top => z
+    | Pentagon.bot, _ => Pentagon.bot
+    | _, Pentagon.bot => Pentagon.bot
+    | Pentagon.a, Pentagon.a => Pentagon.a
+    | Pentagon.b, Pentagon.b => Pentagon.b
+    | Pentagon.c, Pentagon.c => Pentagon.c
+    | Pentagon.a, Pentagon.b => Pentagon.bot
+    | Pentagon.b, Pentagon.a => Pentagon.bot
+    | Pentagon.a, Pentagon.c => Pentagon.a
+    | Pentagon.c, Pentagon.a => Pentagon.a
+    | Pentagon.b, Pentagon.c => Pentagon.b
+    | Pentagon.c, Pentagon.b => Pentagon.b
+
+-- Verify that the pentagon lattice is a lattice
+instance : Lattice Pentagon where
+  le_sup_left := by
+    intro x y
+    cases x <;> cases y <;> simp
+    case bot.bot => trivial
+    case bot.a => trivial
+    case bot.b => trivial
+    case bot.c => trivial
+    case bot.top => trivial
+    case a.bot => trivial
+    case a.a => trivial
+    case a.b => trivial
+    case a.c => trivial
+    case a.top => trivial
+    case b.bot => trivial
+    case b.a => trivial
+    case b.b => trivial
+    case b.c => trivial
+    case b.top => trivial
+    case c.bot => trivial
+    case c.a => trivial
+    case c.b => trivial
+    case c.c => trivial
+    case c.top => trivial
+    case top.bot => trivial
+    case top.a => trivial
+    case top.b => trivial
+    case top.c => trivial
+    case top.top => trivial
+  le_sup_right := by
+    intro x y
+    cases x <;> cases y <;> simp
+    case bot.bot => trivial
+    case bot.a => trivial
+    case bot.b => trivial
+    case bot.c => trivial
+    case bot.top => trivial
+    case a.bot => trivial
+    case a.a => trivial
+    case a.b => trivial
+    case a.c => trivial
+    case a.top => trivial
+    case b.bot => trivial
+    case b.a => trivial
+    case b.b => trivial
+    case b.c => trivial
+    case b.top => trivial
+    case c.bot => trivial
+    case c.a => trivial
+    case c.b => trivial
+    case c.c => trivial
+    case c.top => trivial
+    case top.bot => trivial
+    case top.a => trivial
+    case top.b => trivial
+    case top.c => trivial
+    case top.top => trivial
+  sup_le := by
+    intro x y z
+    cases x <;> cases y <;> cases z <;> simp
+    case bot.bot.bot => trivial
+    case bot.bot.a => trivial
+    case bot.bot.b => trivial
+    case bot.bot.c => trivial
+    case bot.bot.top => trivial
+    case bot.a.a => trivial
+    case bot.a.c => trivial
+    case bot.b.b => trivial
+    case bot.b.c => trivial
+    case bot.c.c => trivial
+    case a.bot.a => trivial
+    case a.bot.c => trivial
+    case a.a.a => trivial
+    case a.a.c => trivial
+    case a.b.c => trivial
+    case a.c.c => trivial
+    case b.bot.b => trivial
+    case b.bot.c => trivial
+    case b.a.c => trivial
+    case b.b.b => trivial
+    case b.b.c => trivial
+    case b.c.c => trivial
+    case c.bot.c => trivial
+    case c.a.c => trivial
+    case c.b.c => trivial
+    case c.c.c => trivial
+    case top.bot.top => trivial
+    case top.a.top => trivial
+    case top.b.top => trivial
+    case top.c.top => trivial
+    case top.top.top => trivial
+  inf_le_left := by
+    intro x y
+    cases x <;> cases y <;> simp
+    case bot.bot => trivial
+    case bot.a => trivial
+    case bot.b => trivial
+    case bot.c => trivial
+    case bot.top => trivial
+    case a.bot => trivial
+    case a.a => trivial
+    case a.b => trivial
+    case a.c => trivial
+    case a.top => trivial
+    case b.bot => trivial
+    case b.a => trivial
+    case b.b => trivial
+    case b.c => trivial
+    case b.top => trivial
+    case c.bot => trivial
+    case c.a => trivial
+    case c.b => trivial
+    case c.c => trivial
+    case c.top => trivial
+    case top.bot => trivial
+    case top.a => trivial
+    case top.b => trivial
+    case top.c => trivial
+    case top.top => trivial
+  inf_le_right := by
+    intro x y
+    cases x <;> cases y <;> simp
+    case bot.bot => trivial
+    case bot.a => trivial
+    case bot.b => trivial
+    case bot.c => trivial
+    case bot.top => trivial
+    case a.bot => trivial
+    case a.a => trivial
+    case a.b => trivial
+    case a.c => trivial
+    case a.top => trivial
+    case b.bot => trivial
+    case b.a => trivial
+    case b.b => trivial
+    case b.c => trivial
+    case b.top => trivial
+    case c.bot => trivial
+    case c.a => trivial
+    case c.b => trivial
+    case c.c => trivial
+    case c.top => trivial
+    case top.bot => trivial
+    case top.a => trivial
+    case top.b => trivial
+    case top.c => trivial
+    case top.top => trivial
+  le_inf := by
+    intro x y z
+    cases x <;> cases y <;> cases z <;> simp
+    case bot.bot.bot => trivial
+    case bot.bot.a => trivial
+    case bot.bot.b => trivial
+    case bot.bot.c => trivial
+    case bot.bot.top => trivial
+    case bot.a.a => trivial
+    case bot.a.c => trivial
+    case bot.b.b => trivial
+    case bot.b.c => trivial
+    case bot.c.c => trivial
+    case a.bot.bot => trivial
+    case a.a.a => trivial
+    case a.c.a => trivial
+    case b.bot.bot => trivial
+    case b.b.b => trivial
+    case b.c.b => trivial
+    case c.bot.bot => trivial
+    case c.a.a => trivial
+    case c.b.b => trivial
+    case c.c.c => trivial
+    case top.bot.bot => trivial
+    case top.a.a => trivial
+    case top.b.b => trivial
+    case top.c.c => trivial
+    case top.top.top => trivial
+
+-- Example usage:
+#eval (Pentagon.a ≤ Pentagon.c)
+#eval (Pentagon.b ≤ Pentagon.a)
+#eval (Pentagon.a ⊔ Pentagon.b)
+#eval (Pentagon.a ⊓ Pentagon.c)
