@@ -228,7 +228,7 @@ P(X²) is the power set of X², ∪ is the union of sets, ∩ is the intersectio
 Set (X x X)
 -/
 
-variable (X : Type u) (R : Set (X × X))
+variable (X : Type u) --(R : Set (X × X))
 
 instance : RelationAlgebra (Set (X × X)) where
   comp R S := { (x, y) | ∃ z, (x, z) ∈ R ∧ (z, y) ∈ S }
@@ -249,23 +249,23 @@ instance : RelationAlgebra (Set (X × X)) where
 #check Finset X
 #check Fintype X
 
-class Ternary (S : Type u) where
+class Ternary (S : Type) where
   ternary : S → S → S → Prop
 
 notation "R "  => Ternary.ternary
 
-class Unary (S : Type u) where
+class Unary (S : Type) where
   unary : S → Prop
 
 prefix:90 "I "  => Unary.unary
 
-class AtomStructure (S : Type u) extends Ternary S, Inv S, Unary S where
+class AtomStructure (S : Type) extends Ternary S, Inv S, Unary S where
   peirce1 : ∀ x y z : S, R x y z ↔ R x⁻¹ z y
   peirce2 : ∀ x y z : S, R x y z ↔ R z y⁻¹ x
   id : ∃ x : S, I x
   identity1 : ∀ x y u : S, I u ∧ R x u y → x = y
   identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R x u y
-  assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
+  assoc : ∀ u x y z w : S, ∃ v : S, R x y u ∧ R u z w → R y z v ∧ R x v w
 
 open AtomStructure
 
@@ -281,8 +281,10 @@ lemma conv_conv (x : S) : x⁻¹⁻¹ = x := by
   R a e a, R a a b, R a b e,
   R b e b, R b a e, R b b a -/
 
+#check (0 : Fin 3)
+
 /- The group Z_3 as atom structure -/
-inductive Z₃ : Type u | e : Z₃ | a : Z₃ | b : Z₃
+inductive Z₃ : Type | e : Z₃ | a : Z₃ | b : Z₃
 open Z₃
 def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
 | e, e, e => True | e, a, a => True | e, b, b => True
@@ -301,17 +303,31 @@ example : ∃ x : Z₃, unary x := by exists e
 example : True → e = e := by intro h; exact rfl
 example : Z₃.ternary e e e := trivial
 
-
 instance : AtomStructure (Z₃) where
   ternary x y z := Z₃.ternary x y z
   unary x := Z₃.unary x
   inv x := Z₃.inv x
-  id := by exists e
+  id := by cases e <;> exact ⟨e, trivial⟩
   peirce1 x y z := by cases x <;> cases y <;> cases z <;> rfl
   peirce2 x y z := by cases x <;> cases y <;> cases z <;> rfl
-  identity1 x y u := by cases x <;> cases y <;> cases u <;> aesop
+  identity1 x y u := by sorry --cases x <;> cases y <;> cases u <;> ((intro; rfl) <|> (intro h; exact False.elim h.1))
   identity2 x y := by cases x <;> cases y <;> (exists e <;> intro; trivial)
-  assoc u x y z w := by cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> rfl
+  assoc u x y z w := by sorry --cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> aesop
+
+#eval R a e a
+
+example : I a ∧ R a a e → e = a := by
+  intro h
+  have k : I a := by exact h.1
+  have : False := by simp at k; exact k
+  exact False.elim this
+
+example : I a = False := by
+  have : I a := by exact trivial
+  have : False := by simp at this; exact this
+  exact False.elim this
+
+example : I e ∧ R a a e → e = e := by intro; rfl
 
 lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
   rw [peirce1, peirce2, peirce1]

@@ -5,6 +5,59 @@ import Mathlib.Order.ModularLattice
 import Mathlib.Data.Finset.Basic
 import Mathlib.Order.Basic
 import Mathlib.Order.Lattice
+import Mathlib.Data.Fin.Basic
+import Mathlib.Algebra.Group.Basic
+import Mathlib.Tactic.Ring
+
+-- Define the group operation (addition modulo 3)
+instance : Add (Fin 3) where
+  add := fun x y => Fin.ofNat (x.val + y.val)
+
+-- Prove that addition is associative
+instance : AddSemigroup (Fin 3) where
+  add_assoc := by
+    intro x y z
+    ring
+
+-- Prove that 0 is the identity element
+instance : AddMonoid (Fin 3) where
+  zero := 0
+  add_zero := by
+    intro x
+    apply Fin.eq_of_val_eq
+    simp [Fin.val]
+  zero_add := by
+    intro x
+    apply Fin.eq_of_val_eq
+    simp [Fin.val]
+  nsmul := fun n x => Fin.ofNat (n * x.val)
+  nsmul_zero : _ := by sorry --intros; rfl
+  nsmul_succ : _ := by sorry
+
+-- Prove that every element has an additive inverse
+instance : AddGroup (Fin 3) where
+  neg := fun x => Fin.ofNat (3 - x.val)
+  zsmul := sorry --fun n x => Fin.ofNat (n * x.val)
+  neg_add_cancel := sorry
+  --sub_eq_neg_add := sorry
+/--by
+    intro x
+    simp [Add.add, Add.neg]
+    apply Fin.eq_of_val_eq
+    simp [Fin.val]
+    ring
+--/
+
+-- Verify that it is a commutative group
+instance : AddCommGroup (Fin 3) where
+  add_comm := by
+    intro x y
+    ring
+
+-- Example usage:
+#eval (Fin.ofNat 1 + Fin.ofNat 2)
+#eval (-(Fin.ofNat 1))
+#eval (Fin.ofNat 1 + Fin.ofNat 1 + Fin.ofNat 1)
 
 #check (List.range 5).map
 
@@ -27,6 +80,7 @@ variable (n : ℕ)
 #eval allPermutations 3
 #eval allPermutations 4
 
+#help tactic try
 
 #check CommRing (ZMod 3)
 
