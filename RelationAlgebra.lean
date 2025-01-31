@@ -89,6 +89,9 @@ open RelationAlgebra
 
 variable {A : Type u} [RelationAlgebra A]
 
+-- Note on Aesop: Simp Lemmas are used by aesop when recursively simplifying what the goal or hypothesis --> they call these normalisation rules and are customizsable. Aesop is essentially recursively making use of the best possible normalisation rule and making obvious deductions
+
+
 /- these simp lemmas are not needed so far
 @[simp] lemma rdist' (x y z : A) : (x ⊔ y) ; z = x ; z ⊔ y ; z := rdist x y z
 @[simp] lemma conv_conv' (x : A) : x⁻¹⁻¹ = x := conv_conv x
@@ -312,7 +315,11 @@ instance : AtomStructure (Z₃) where
   peirce2 x y z := by cases x <;> cases y <;> cases z <;> rfl
   identity1 x y u := by sorry --cases x <;> cases y <;> cases u <;> ((intro; rfl) <|> (intro h; exact False.elim h.1))
   identity2 x y := by cases x <;> cases y <;> (exists e <;> intro; trivial)
-  assoc u x y z w := by sorry --cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> aesop
+  assoc u x y z w := by sorry --cases u <;> cases x <;> cases y <;> cases z <;> cases w <;> use aesop
+
+  --aesop struggles with existential quantifiers because it has troubles providing witness (concrete examaples) for the cases.
+
+  -- can implement the cases with tactic, the "with" keyword is used to provide the witness for the existential quantifier
 
 #eval R a e a
 
