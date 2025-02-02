@@ -344,12 +344,3 @@ lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R 
   rw [peirce1, peirce2]
   intro h
   have h : R y z⁻¹ v ∧ R x⁻¹ v⁻¹ w := by sorry
-
-
-
-
-
--- I think the Schröder equivalence is a consequence of the relation algebra axioms and not a separate axiom in itself.
-/- Schröder equivalence: ∀ x,y ∈ A, x;(x⁻¹;yᶜ)ᶜ ≤ y -/
-
-/- converses a ∈ A ⇒ a⁻¹ ∈ A where a⁻¹ = {(c,b) | (b,c) ∈ a} -/
