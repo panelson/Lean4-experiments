@@ -272,7 +272,7 @@ class AtomStructure (S : Type) extends Ternary S, Inv S, Unary S where
 
 open AtomStructure
 
-variable {S : Type u} [AtomStructure S]
+variable {S : Type} [AtomStructure S]
 
 lemma conv_conv (x : S) : x⁻¹⁻¹ = x := by
   have h : ∃ e : S, I e ∧ R x e x := by rw [←identity]
@@ -339,8 +339,30 @@ example : I e ∧ R a a e → e = e := by intro; rfl
 lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
   rw [peirce1, peirce2, peirce1]
 
-
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
-  rw [peirce1, peirce2]
-  intro h
-  have h : R y z⁻¹ v ∧ R x⁻¹ v⁻¹ w := by sorry
+  rintro ⟨hyzv, hxvw⟩  --Destructure the conjunction hypothesis
+  let u := x ; y
+
+/-
+The ternary operator describes whether the relation between the three relations holds or not.
+
+If given these mappings:
+((y: b->c ∧ z: c->d ) ( v: b->d ))
+((x: a->b ∧ v: b->d ) ( w: a->d ))
+
+We can deduce these mappings:
+
+We already know x and y are true, so we can deduce u is true
+((x: a->b ∧ y: b->c ) ( u: a->c ))
+
+Now that we have u, we can complete the picture and show how u is related to z and w
+((u: a->c ∧ z: c->d ) ( w: a->d ))
+
+NOTE: there are no mappings that take "d" as an input, which I think may point to the fact of this proof being right associative.
+
+x: a->b y: b->c z: c->d
+
+QUESTION: How can I determine the inverses of each mapping?
+  --> It makes sense for inverses to not be composable
+
+-/
