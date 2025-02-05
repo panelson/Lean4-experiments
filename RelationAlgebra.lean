@@ -340,8 +340,15 @@ lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
   rw [peirce1, peirce2, peirce1]
 
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
-  rintro ⟨hyzv, hxvw⟩  --Destructure the conjunction hypothesis
-  let u := x ; y
+  rintro ⟨hyzv, hxvw⟩ --Destructure the conjunction hypothesis
+
+  --Trying to transform xvw to v⁻¹x⁻¹w but using peirce laws.
+  have hxvw' : R w v⁻¹ x := (peirce2 x v w).mp hxvw
+  have hxvw'' : R v⁻¹⁻¹ w⁻¹ x⁻¹ := (peirce3 w v⁻¹ x).mp hxvw'
+  have hxvw''' : R v⁻¹⁻¹⁻¹ x⁻¹ w⁻¹⁻¹ := (peirce3 v⁻¹⁻¹ w⁻¹ x⁻¹).mpr hxvw''
+
+
+
 
 /-
 The ternary operator describes whether the relation between the three relations holds or not.
@@ -362,7 +369,9 @@ NOTE: there are no mappings that take "d" as an input, which I think may point t
 
 x: a->b y: b->c z: c->d
 
-QUESTION: How can I determine the inverses of each mapping?
+QUESTION: How do I want to define the inverses of each mapping? ANSWER: By switching the input and output, for ex: v inverse is u.
+
+It follows then that I should be able to use peirce laws to manipulate these equalities and show that there exists a U which gives way to two other true ternary relations.
   --> It makes sense for inverses to not be composable
 
 -/
