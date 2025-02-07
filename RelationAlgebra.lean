@@ -268,7 +268,7 @@ class AtomStructure (S : Type) extends Ternary S, Inv S, Unary S where
   id : ∃ x : S, I x
   identity1 : ∀ x y u : S, I u ∧ R x u y → x = y
   identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R x u y
-  assoc : ∀ u x y z w : S, ∃ v : S, R x y u ∧ R u z w → R y z v ∧ R x v w
+  assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
 
 open AtomStructure
 
@@ -321,7 +321,7 @@ instance : AtomStructure (Z₃) where
 
   -- can implement the cases with tactic, the "with" keyword is used to provide the witness for the existential quantifier
 
-#eval R a e a
+--#eval R a e a
 
 example : I a ∧ R a a e → e = a := by
   intro h
@@ -339,17 +339,27 @@ example : I e ∧ R a a e → e = e := by intro; rfl
 lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
   rw [peirce1, peirce2, peirce1]
 
+--assoc : ∀ u x y z w : S, R  x  y   u   ∧ R u   z   w → ∃ v : S, R y z v ∧ R x v w
+--                         R z⁻¹ y⁻¹ v⁻¹ ∧ R v⁻¹ x⁻¹ w⁻¹
+
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   rintro ⟨hyzv, hxvw⟩ --Destructure the conjunction hypothesis
   --Trying to transform xvw to v⁻¹x⁻¹w but using peirce laws.
 
   have hxvw' : R v⁻¹ x⁻¹ w⁻¹ := (peirce3 x v w).mp hxvw
   have hyzv' : R z⁻¹ y⁻¹ v⁻¹ := (peirce3 y z v).mp hyzv
+  have hand : R z⁻¹ y⁻¹ v⁻¹ ∧ R v⁻¹ x⁻¹ w⁻¹ := ⟨hyzv', hxvw'⟩
+  have h : ∃ t : S, R y⁻¹ x⁻¹ t ∧ R z⁻¹ t w⁻¹ := (AtomStructure.assoc v⁻¹ z⁻¹ y⁻¹ x⁻¹ w⁻¹) hand
+  cases h with
+  | intro m mh
+    have h1 : R x y m := by exact (peirce3 y x m).mpr mh.1
+    have h2 : R z⁻¹ m w⁻¹ := by exact mh.2
 
-  let t := y⁻¹
-  let m := w⁻¹
 
-  have hxvw'' : R y⁻¹ x⁻¹ m := by exact hxvw'
+
+
+/-
+  have hxvw'' : R y⁻¹ x⁻¹ m := hxvw'
   have hyzv'' : R z⁻¹ t w⁻¹ := by exact hyzv'
   have u := t
   have u := m
@@ -357,7 +367,7 @@ lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R 
   have hyzv''' : R u z w := (peirce3 z⁻¹ t w⁻¹).mpr hyzv''
 
   exact ⟨u, hxvw''', hyzv'''⟩
-
+-/
   -- show m = t
   --apply peirce laws to hxvw'' and hyzv''
   --substitute u
