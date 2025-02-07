@@ -341,14 +341,26 @@ lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
 
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   rintro ⟨hyzv, hxvw⟩ --Destructure the conjunction hypothesis
-
   --Trying to transform xvw to v⁻¹x⁻¹w but using peirce laws.
-  have hxvw' : R w v⁻¹ x := (peirce2 x v w).mp hxvw
-  have hxvw'' : R v⁻¹⁻¹ w⁻¹ x⁻¹ := (peirce3 w v⁻¹ x).mp hxvw'
-  have hxvw''' : R v⁻¹⁻¹⁻¹ x⁻¹ w⁻¹⁻¹ := (peirce3 v⁻¹⁻¹ w⁻¹ x⁻¹).mpr hxvw''
 
+  have hxvw' : R v⁻¹ x⁻¹ w⁻¹ := (peirce3 x v w).mp hxvw
+  have hyzv' : R z⁻¹ y⁻¹ v⁻¹ := (peirce3 y z v).mp hyzv
 
+  let t := y⁻¹
+  let m := w⁻¹
 
+  have hxvw'' : R y⁻¹ x⁻¹ m := by exact hxvw'
+  have hyzv'' : R z⁻¹ t w⁻¹ := by exact hyzv'
+  have u := t
+  have u := m
+  have hxvw''' : R x y u := (peirce3 y⁻¹ x⁻¹ m).mpr hxvw''
+  have hyzv''' : R u z w := (peirce3 z⁻¹ t w⁻¹).mpr hyzv''
+
+  exact ⟨u, hxvw''', hyzv'''⟩
+
+  -- show m = t
+  --apply peirce laws to hxvw'' and hyzv''
+  --substitute u
 
 /-
 The ternary operator describes whether the relation between the three relations holds or not.
