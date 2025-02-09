@@ -274,10 +274,16 @@ open AtomStructure
 
 variable {S : Type} [AtomStructure S]
 
-lemma conv_conv (x : S) : x⁻¹⁻¹ = x := by
-  have h : ∃ e : S, I e ∧ R x e x := by rw [←identity]
-  cases h with
-  | intro e h' => rw [peirce1] at h'; rw [peirce1] at h'; exact (identity x⁻¹⁻¹ x).mpr ⟨e, h'⟩
+lemma conv_conv1 (x : S) : x⁻¹⁻¹ = x := by
+  have h : ∃ e : S, x = x → I e ∧ R x e x := identity2 x x
+  cases' h with e em
+  have h' : I e ∧ R x e x := em rfl
+  have h'' : I e := h'.1
+  have h''' : R x e x := h'.2
+  have h1 : R x⁻¹ x e := by rw [peirce1] at h'''; exact h'''
+  have h2 : R x⁻¹⁻¹ e x := by rw [peirce1] at h1; exact h1
+  have h3 : I e ∧ R x⁻¹⁻¹ e x → x⁻¹⁻¹ = x := identity1 x⁻¹⁻¹ x e
+  exact h3 ⟨h'', h2⟩
 
 /- define atom structure with atoms e, a, b and relations
   R e e e, R e a a, R e b b,
@@ -328,12 +334,12 @@ example : I a ∧ R a a e → e = a := by
   have k : I a := by exact h.1
   have : False := by simp at k; exact k
   exact False.elim this
-
+/-
 example : I a = False := by
   have : I a := by exact trivial
   have : False := by simp at this; exact this
   exact False.elim this
-
+-/
 example : I e ∧ R a a e → e = e := by intro; rfl
 
 lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
@@ -342,20 +348,21 @@ lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
 --assoc : ∀ u x y z w : S, R  x  y   u   ∧ R u   z   w → ∃ v : S, R y z v ∧ R x v w
 --                         R z⁻¹ y⁻¹ v⁻¹ ∧ R v⁻¹ x⁻¹ w⁻¹
 
+
+
+
 lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
   rintro ⟨hyzv, hxvw⟩ --Destructure the conjunction hypothesis
-  --Trying to transform xvw to v⁻¹x⁻¹w but using peirce laws.
-
   have hxvw' : R v⁻¹ x⁻¹ w⁻¹ := (peirce3 x v w).mp hxvw
   have hyzv' : R z⁻¹ y⁻¹ v⁻¹ := (peirce3 y z v).mp hyzv
   have hand : R z⁻¹ y⁻¹ v⁻¹ ∧ R v⁻¹ x⁻¹ w⁻¹ := ⟨hyzv', hxvw'⟩
   have h : ∃ t : S, R y⁻¹ x⁻¹ t ∧ R z⁻¹ t w⁻¹ := (AtomStructure.assoc v⁻¹ z⁻¹ y⁻¹ x⁻¹ w⁻¹) hand
-  cases h with
-  | intro m mh
-    have h1 : R x y m := by exact (peirce3 y x m).mpr mh.1
-    have h2 : R z⁻¹ m w⁻¹ := by exact mh.2
-
-
+  cases' h with c mh
+  have h1 : R x⁻¹⁻¹ y⁻¹⁻¹ c⁻¹ := (peirce3 _ _ _).mp mh.1
+  have h2 : R c⁻¹ z⁻¹⁻¹ w⁻¹⁻¹ := (peirce3 _ _ _).mp mh.2
+  have h3 : R x y c⁻¹ := by rw [conv_conv1, conv_conv1] at h1; exact h1
+  have h4 : R c⁻¹ z w := by rw [conv_conv1, conv_conv1] at h2; exact h2
+  use c⁻¹
 
 
 /-
