@@ -37,23 +37,23 @@ lemma P2 : (∃ x, P x ∨ Q x) ↔ (∃ x, P x) ∨ (∃ x, Q x) := by
       · intro h₂
         apply Or.inl
         apply Exists.intro x
-        apply h₂
+        exact h₂
       · intro h₃
         apply Or.inr
         apply Exists.intro x
-        apply h₃
+        exact h₃
   · intro h
     apply Or.elim h
     · intro h₁
       apply Exists.elim h₁
       · intro x h₂
         apply Exists.intro x
-        apply Or.inl h₂
+        exact Or.inl h₂
     · intro h₁
       apply Exists.elim h₁
       · intro x h₂
         apply Exists.intro x
-        apply Or.inr h₂
+        exact Or.inr h₂
 
 -- Define the group operation (addition modulo 3)
 instance : Add (Fin 3) where
