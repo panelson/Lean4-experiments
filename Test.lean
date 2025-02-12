@@ -9,6 +9,52 @@ import Mathlib.Data.Fin.Basic
 import Mathlib.Algebra.Group.Basic
 import Mathlib.Tactic.Ring
 
+variable (A : Type) (P Q : A → Prop) (x y z : A)
+
+lemma P1 : (∀ x, P x ∧ Q x) ↔ (∀ x, P x) ∧ (∀ x, Q x) := by
+  constructor
+  · intro h
+    constructor
+    · intro x
+      apply And.left
+      apply h
+    · intro x
+      apply And.right
+      apply h
+  · intro h
+    intro x
+    constructor
+    · apply h.left
+    · apply h.right
+
+
+lemma P2 : (∃ x, P x ∨ Q x) ↔ (∃ x, P x) ∨ (∃ x, Q x) := by
+  constructor
+  · intro h
+    apply Exists.elim h
+    · intro x h₁
+      apply Or.elim h₁
+      · intro h₂
+        apply Or.inl
+        apply Exists.intro x
+        apply h₂
+      · intro h₃
+        apply Or.inr
+        apply Exists.intro x
+        apply h₃
+  · intro h
+    apply Or.elim h
+    · intro h₁
+      apply Exists.elim h₁
+      · intro x h₂
+        apply Exists.intro x
+        apply Or.inl h₂
+    · intro h₁
+      apply Exists.elim h₁
+      · intro x h₂
+        apply Exists.intro x
+        apply Or.inr h₂
+
 -- Define the group operation (addition modulo 3)
 instance : Add (Fin 3) where
   add := fun x y => Fin.ofNat (x.val + y.val)
@@ -239,252 +285,3 @@ end Z₂
 
 -- In a comment at the top of Prelude.lean (left over from Lean 3?):
 --show T' from e
-
--- Define the pentagon lattice N₅
-def N₅ : Type := Fin 5
-
--- Define the lattice structure on N₅
-
--- Define the elements of the pentagon lattice
-inductive Pentagon where | bot | a | b | c | top
-
--- Define the partial order on the pentagon lattice
-instance : PartialOrder Pentagon where
-  le := fun x y =>
-    match x, y with
-    | Pentagon.bot, _ => True
-    | _, Pentagon.top => True
-    | Pentagon.a, Pentagon.a => True
-    | Pentagon.b, Pentagon.b => True
-    | Pentagon.c, Pentagon.c => True
-    | Pentagon.a, Pentagon.c => True
-    | Pentagon.b, Pentagon.c => True
-    | _, _ => False
-  le_refl := by
-    intro x
-    cases x <;> simp
-  le_trans := by
-    intro x y z
-    cases x <;> cases y <;> cases z <;> simp
-  le_antisymm := by
-    intro x y
-    cases x <;> cases y <;> simp
-
--- Define the join (least upper bound) operation
-instance : Sup Pentagon where
-  sup := fun x y =>
-    match x, y with
-    | Pentagon.bot, z => z
-    | z, Pentagon.bot => z
-    | Pentagon.top, _ => Pentagon.top
-    | _, Pentagon.top => Pentagon.top
-    | Pentagon.a, Pentagon.a => Pentagon.a
-    | Pentagon.b, Pentagon.b => Pentagon.b
-    | Pentagon.c, Pentagon.c => Pentagon.c
-    | Pentagon.a, Pentagon.b => Pentagon.c
-    | Pentagon.b, Pentagon.a => Pentagon.c
-    | Pentagon.a, Pentagon.c => Pentagon.c
-    | Pentagon.c, Pentagon.a => Pentagon.c
-    | Pentagon.b, Pentagon.c => Pentagon.c
-    | Pentagon.c, Pentagon.b => Pentagon.c
-
--- Define the meet (greatest lower bound) operation
-instance : Inf Pentagon where
-  inf := fun x y =>
-    match x, y with
-    | Pentagon.top, z => z
-    | z, Pentagon.top => z
-    | Pentagon.bot, _ => Pentagon.bot
-    | _, Pentagon.bot => Pentagon.bot
-    | Pentagon.a, Pentagon.a => Pentagon.a
-    | Pentagon.b, Pentagon.b => Pentagon.b
-    | Pentagon.c, Pentagon.c => Pentagon.c
-    | Pentagon.a, Pentagon.b => Pentagon.bot
-    | Pentagon.b, Pentagon.a => Pentagon.bot
-    | Pentagon.a, Pentagon.c => Pentagon.a
-    | Pentagon.c, Pentagon.a => Pentagon.a
-    | Pentagon.b, Pentagon.c => Pentagon.b
-    | Pentagon.c, Pentagon.b => Pentagon.b
-
--- Verify that the pentagon lattice is a lattice
-instance : Lattice Pentagon where
-  le_sup_left := by
-    intro x y
-    cases x <;> cases y <;> simp
-    case bot.bot => trivial
-    case bot.a => trivial
-    case bot.b => trivial
-    case bot.c => trivial
-    case bot.top => trivial
-    case a.bot => trivial
-    case a.a => trivial
-    case a.b => trivial
-    case a.c => trivial
-    case a.top => trivial
-    case b.bot => trivial
-    case b.a => trivial
-    case b.b => trivial
-    case b.c => trivial
-    case b.top => trivial
-    case c.bot => trivial
-    case c.a => trivial
-    case c.b => trivial
-    case c.c => trivial
-    case c.top => trivial
-    case top.bot => trivial
-    case top.a => trivial
-    case top.b => trivial
-    case top.c => trivial
-    case top.top => trivial
-  le_sup_right := by
-    intro x y
-    cases x <;> cases y <;> simp
-    case bot.bot => trivial
-    case bot.a => trivial
-    case bot.b => trivial
-    case bot.c => trivial
-    case bot.top => trivial
-    case a.bot => trivial
-    case a.a => trivial
-    case a.b => trivial
-    case a.c => trivial
-    case a.top => trivial
-    case b.bot => trivial
-    case b.a => trivial
-    case b.b => trivial
-    case b.c => trivial
-    case b.top => trivial
-    case c.bot => trivial
-    case c.a => trivial
-    case c.b => trivial
-    case c.c => trivial
-    case c.top => trivial
-    case top.bot => trivial
-    case top.a => trivial
-    case top.b => trivial
-    case top.c => trivial
-    case top.top => trivial
-  sup_le := by
-    intro x y z
-    cases x <;> cases y <;> cases z <;> simp
-    case bot.bot.bot => trivial
-    case bot.bot.a => trivial
-    case bot.bot.b => trivial
-    case bot.bot.c => trivial
-    case bot.bot.top => trivial
-    case bot.a.a => trivial
-    case bot.a.c => trivial
-    case bot.b.b => trivial
-    case bot.b.c => trivial
-    case bot.c.c => trivial
-    case a.bot.a => trivial
-    case a.bot.c => trivial
-    case a.a.a => trivial
-    case a.a.c => trivial
-    case a.b.c => trivial
-    case a.c.c => trivial
-    case b.bot.b => trivial
-    case b.bot.c => trivial
-    case b.a.c => trivial
-    case b.b.b => trivial
-    case b.b.c => trivial
-    case b.c.c => trivial
-    case c.bot.c => trivial
-    case c.a.c => trivial
-    case c.b.c => trivial
-    case c.c.c => trivial
-    case top.bot.top => trivial
-    case top.a.top => trivial
-    case top.b.top => trivial
-    case top.c.top => trivial
-    case top.top.top => trivial
-  inf_le_left := by
-    intro x y
-    cases x <;> cases y <;> simp
-    case bot.bot => trivial
-    case bot.a => trivial
-    case bot.b => trivial
-    case bot.c => trivial
-    case bot.top => trivial
-    case a.bot => trivial
-    case a.a => trivial
-    case a.b => trivial
-    case a.c => trivial
-    case a.top => trivial
-    case b.bot => trivial
-    case b.a => trivial
-    case b.b => trivial
-    case b.c => trivial
-    case b.top => trivial
-    case c.bot => trivial
-    case c.a => trivial
-    case c.b => trivial
-    case c.c => trivial
-    case c.top => trivial
-    case top.bot => trivial
-    case top.a => trivial
-    case top.b => trivial
-    case top.c => trivial
-    case top.top => trivial
-  inf_le_right := by
-    intro x y
-    cases x <;> cases y <;> simp
-    case bot.bot => trivial
-    case bot.a => trivial
-    case bot.b => trivial
-    case bot.c => trivial
-    case bot.top => trivial
-    case a.bot => trivial
-    case a.a => trivial
-    case a.b => trivial
-    case a.c => trivial
-    case a.top => trivial
-    case b.bot => trivial
-    case b.a => trivial
-    case b.b => trivial
-    case b.c => trivial
-    case b.top => trivial
-    case c.bot => trivial
-    case c.a => trivial
-    case c.b => trivial
-    case c.c => trivial
-    case c.top => trivial
-    case top.bot => trivial
-    case top.a => trivial
-    case top.b => trivial
-    case top.c => trivial
-    case top.top => trivial
-  le_inf := by
-    intro x y z
-    cases x <;> cases y <;> cases z <;> simp
-    case bot.bot.bot => trivial
-    case bot.bot.a => trivial
-    case bot.bot.b => trivial
-    case bot.bot.c => trivial
-    case bot.bot.top => trivial
-    case bot.a.a => trivial
-    case bot.a.c => trivial
-    case bot.b.b => trivial
-    case bot.b.c => trivial
-    case bot.c.c => trivial
-    case a.bot.bot => trivial
-    case a.a.a => trivial
-    case a.c.a => trivial
-    case b.bot.bot => trivial
-    case b.b.b => trivial
-    case b.c.b => trivial
-    case c.bot.bot => trivial
-    case c.a.a => trivial
-    case c.b.b => trivial
-    case c.c.c => trivial
-    case top.bot.bot => trivial
-    case top.a.a => trivial
-    case top.b.b => trivial
-    case top.c.c => trivial
-    case top.top.top => trivial
-
--- Example usage:
-#eval (Pentagon.a ≤ Pentagon.c)
-#eval (Pentagon.b ≤ Pentagon.a)
-#eval (Pentagon.a ⊔ Pentagon.b)
-#eval (Pentagon.a ⊓ Pentagon.c)
