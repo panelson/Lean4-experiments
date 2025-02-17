@@ -89,6 +89,18 @@ open RelationAlgebra
 
 variable {A : Type u} [RelationAlgebra A]
 
+
+def isJtrue (t u v w x y z : A) : Prop :=
+  t ≤ u;v ⊓ w;x  ∧  u⁻¹;w ⊓ v;x⁻¹ ≤ y;z → t ≤ (u;y ⊓ w;z⁻¹);(y⁻¹;v ⊓ x;z)
+
+def isLtrue (u v w x y z : A) : Prop :=
+  x;y ⊓ z;w ⊓ u;v ≤ x;((x⁻¹;z ⊓ y;w⁻¹);(z⁻¹;u ⊓ w;v⁻¹) ⊓ x⁻¹;u ⊓ y;v⁻¹);v
+
+def isMtrue (t u v w x y z : A) : Prop := sorry
+  --t ⊓ (u ⊓ v;w);(x ⊓ y;z) ≤ x ; ((x⁻¹ ; z ⊓ y ; w⁻¹) ; (z⁻¹ ; u ⊓ w ; v⁻¹) ⊓ x⁻¹ ; u ⊓ y ; v⁻¹) ; v
+
+
+
 -- Note on Aesop: Simp Lemmas are used by aesop when recursively simplifying what the goal or hypothesis --> they call these normalisation rules and are customizsable. Aesop is essentially recursively making use of the best possible normalisation rule and making obvious deductions
 
 
@@ -243,8 +255,26 @@ instance : RelationAlgebra (Set (X × X)) where
   inf R S := R ∩ S
   compl R := Set.univ \ R
   le_refl := by sorry
+  le_trans := by sorry
+  le_antisymm := by sorry
+  le_sup_left := by sorry
+  le_sup_right := by sorry
+  sup_le := by sorry
+  le_inf := by sorry
+  inf_le_left := by sorry
+  inf_le_right := by sorry
+  le_sup_inf := by sorry
+  inf_compl_le_bot := by sorry
+  top_le_sup_compl := by sorry
+  bot_le := by sorry
+  le_top := by sorry
   assoc x y z := by sorry
   rdist x y z := by sorry
+  comp_one x := by sorry
+  conv_conv x := by sorry
+  conv_dist x y := by sorry
+  conv_comp x y := by sorry
+  schroeder x y := by sorry
 
 --instance : Comp A where
 -- comp := λ x y => x ; y
@@ -363,6 +393,7 @@ lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R 
   have h3 : R x y c⁻¹ := by rw [conv_conv1, conv_conv1] at h1; exact h1
   have h4 : R c⁻¹ z w := by rw [conv_conv1, conv_conv1] at h2; exact h2
   use c⁻¹
+
 
 
 /-
