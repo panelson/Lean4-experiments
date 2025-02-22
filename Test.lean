@@ -46,25 +46,49 @@ class Add (a : Type) where
 -- Add.add : {a : Type} → [self : Add a] → a → a → a
 end Ex
 
+variable (α : Type) (p q : α → Prop)
+variable (r : Prop)
 
-variable (A : Type) (P Q : A → Prop) (x y z : A)
+example : α → ((∀ x : α, r) ↔ r) := by
+  intro a
+  constructor
+  · intro h
+    apply h a
+  · intro h
+    intro x
+    exact h
+
+example : (∀ x, p x ∨ r) ↔ (∀ x, p x) ∨ r := sorry
+example : (∀ x, r → p x) ↔ (r → ∀ x, p x) := sorry
+
+
+variable (A : Type) (P Q : A → Prop) (c x y z : A)
 
 variable (R : Prop)
 
-lemma P0 : (∀ x, P x ∧ R) ↔ (∀ x, P x) ∧ R := by
+lemma P0 : A → ((∀ x, P x ∧ R) ↔ (∀ x, P x) ∧ R) := by
+  intro a
   constructor --main proof shows equivalence
   · intro h
     constructor --Subproof shows P x ∧ R => P x and R
     · intro x --Subproof shows for all x, P x
       apply And.left --get P x , P x is true, and Left...
       apply h --since we have P x, we can apply hypothesis to show we have R
+    · apply (h a).right
   · intro h --Subproof shows P x and R => P x ∧ R
     intro x
     constructor
     · apply h.left --Left is true
     · apply h.right --Right is true
 
+lemma allOrR : (∀ x, P x ∨ R) ↔ (∀ x, P x) ∨ R := by
+  sorry
 
+lemma existsAndR : (∃ x, P x ∧ R) ↔ (∃ x, P x) ∧ R := by
+  sorry
+
+lemma existsOrR : (∃ x, P x ∨ R) ↔ (∃ x, P x) ∨ R := by
+  sorry
 
 lemma P1 : (∀ x, P x ∧ Q x) ↔ (∀ x, P x) ∧ (∀ x, Q x) := by
   constructor
