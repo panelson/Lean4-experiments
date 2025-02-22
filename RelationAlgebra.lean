@@ -245,6 +245,19 @@ Set (X x X)
 
 variable (X : Type u) --(R : Set (X × X))
 
+
+instance instBooleanAlgebra : BooleanAlgebra (Set (X × X)) :=
+  { (inferInstance : BooleanAlgebra ((X × X) → Prop)) with
+    sup := (· ∪ ·),
+    le := (· ≤ ·),
+    lt := fun s t => s ⊆ t ∧ ¬t ⊆ s,
+    inf := (· ∩ ·),
+    bot := ∅,
+    compl := (·ᶜ),
+    top := Set.univ,
+    sdiff := (· \ ·) }
+
+
 instance : RelationAlgebra (Set (X × X)) where
   comp R S := { (x, y) | ∃ z, (x, z) ∈ R ∧ (z, y) ∈ S }
   one := { (x, y) | x = y }
@@ -276,6 +289,38 @@ instance : RelationAlgebra (Set (X × X)) where
   conv_comp x y := by sorry
   schroeder x y := by sorry
 
+variable {G : Type u} [Group G]
+
+instance : RelationAlgebra (Set G) where
+  comp X Y := { z | ∃ x ∈ X, ∃ y ∈ Y, z = x * y }
+  one := { 1 }
+  inv X := { x⁻¹ | x ∈ X }
+  bot := ∅
+  top := Set.univ
+  sup R S := R ∪ S
+  inf R S := R ∩ S
+  compl R := Set.univ \ R
+  le_refl := by sorry
+  le_trans := by sorry
+  le_antisymm := by sorry
+  le_sup_left := by sorry
+  le_sup_right := by sorry
+  sup_le := by sorry
+  le_inf := by sorry
+  inf_le_left := by sorry
+  inf_le_right := by sorry
+  le_sup_inf := by sorry
+  inf_compl_le_bot := by sorry
+  top_le_sup_compl := by sorry
+  bot_le := by sorry
+  le_top := by sorry
+  assoc x y z := by sorry
+  rdist x y z := by sorry
+  comp_one x := by sorry
+  conv_conv x := by sorry
+  conv_dist x y := by sorry
+  conv_comp x y := by sorry
+  schroeder x y := by sorry
 --instance : Comp A where
 -- comp := λ x y => x ; y
 
