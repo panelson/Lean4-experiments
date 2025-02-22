@@ -245,6 +245,7 @@ Set (X x X)
 
 variable (X : Type u) --(R : Set (X × X))
 
+variable [BooleanAlgebra (Set (X × X))]
 
 instance instBooleanAlgebra : BooleanAlgebra (Set (X × X)) :=
   { (inferInstance : BooleanAlgebra ((X × X) → Prop)) with

@@ -9,6 +9,44 @@ import Mathlib.Data.Fin.Basic
 import Mathlib.Algebra.Group.Basic
 import Mathlib.Tactic.Ring
 
+namespace Ex
+class Inhabited (a : Type _) where
+ default : a
+instance : Inhabited Bool where
+ default := true
+instance : Inhabited Nat where
+ default := 0
+instance : Inhabited Unit where
+ default := ()
+instance : Inhabited Prop where
+ default := True
+
+export Inhabited (default)
+
+#eval (default : Nat)
+-- 0
+
+#eval (default : Bool)
+-- true
+
+instance [Inhabited a] [Inhabited b] : Inhabited (a × b) where
+  default := (default, default)
+
+#eval (default : Nat × Bool)
+
+#print inferInstance
+
+end Ex
+
+namespace Ex
+class Add (a : Type) where
+  add : a → a → a
+
+#check Add.add
+-- Add.add : {a : Type} → [self : Add a] → a → a → a
+end Ex
+
+
 variable (A : Type) (P Q : A → Prop) (x y z : A)
 
 variable (R : Prop)
