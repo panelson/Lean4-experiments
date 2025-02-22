@@ -11,6 +11,23 @@ import Mathlib.Tactic.Ring
 
 variable (A : Type) (P Q : A → Prop) (x y z : A)
 
+variable (R : Prop)
+
+lemma P0 : (∀ x, P x ∧ R) ↔ (∀ x, P x) ∧ R := by
+  constructor --main proof shows equivalence
+  · intro h
+    constructor --Subproof shows P x ∧ R => P x and R
+    · intro x --Subproof shows for all x, P x
+      apply And.left --get P x , P x is true, and Left...
+      apply h --since we have P x, we can apply hypothesis to show we have R
+  · intro h --Subproof shows P x and R => P x ∧ R
+    intro x
+    constructor
+    · apply h.left --Left is true
+    · apply h.right --Right is true
+
+
+
 lemma P1 : (∀ x, P x ∧ Q x) ↔ (∀ x, P x) ∧ (∀ x, Q x) := by
   constructor
   · intro h
