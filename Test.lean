@@ -9,6 +9,18 @@ import Mathlib.Data.Fin.Basic
 import Mathlib.Algebra.Group.Basic
 import Mathlib.Tactic.Ring
 
+#check #[#[0, 1], #[2]]  
+
+#eval let A := #[#[0, 1], #[2]]; A[0][0]
+
+#eval let A := [[0, 1], [2]]; A[0].length
+
+
+
+#print Nat 
+
+#print BooleanAlgebra
+
 namespace Ex
 class Inhabited (a : Type _) where
  default : a
