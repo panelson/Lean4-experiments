@@ -470,48 +470,6 @@ lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R 
   have h4 : R c⁻¹ z w := by rw [conv_conv1, conv_conv1] at h2; exact h2
   use c⁻¹
 
-
-
-/-
-  have hxvw'' : R y⁻¹ x⁻¹ m := hxvw'
-  have hyzv'' : R z⁻¹ t w⁻¹ := by exact hyzv'
-  have u := t
-  have u := m
-  have hxvw''' : R x y u := (peirce3 y⁻¹ x⁻¹ m).mpr hxvw''
-  have hyzv''' : R u z w := (peirce3 z⁻¹ t w⁻¹).mpr hyzv''
-
-  exact ⟨u, hxvw''', hyzv'''⟩
--/
-  -- show m = t
-  --apply peirce laws to hxvw'' and hyzv''
-  --substitute u
-
-/-
-The ternary operator describes whether the relation between the three relations holds or not.
-
-If given these mappings:
-((y: b->c ∧ z: c->d ) ( v: b->d ))
-((x: a->b ∧ v: b->d ) ( w: a->d ))
-
-We can deduce these mappings:
-
-We already know x and y are true, so we can deduce u is true
-((x: a->b ∧ y: b->c ) ( u: a->c ))
-
-Now that we have u, we can complete the picture and show how u is related to z and w
-((u: a->c ∧ z: c->d ) ( w: a->d ))
-
-NOTE: there are no mappings that take "d" as an input, which I think may point to the fact of this proof being right associative.
-
-x: a->b y: b->c z: c->d
-
-QUESTION: How do I want to define the inverses of each mapping? ANSWER: By switching the input and output, for ex: v inverse is u.
-
-It follows then that I should be able to use peirce laws to manipulate these equalities and show that there exists a U which gives way to two other true ternary relations.
-  --> It makes sense for inverses to not be composable
-
--/
-
 /--Roger Maddux's list of integral 4-atom relation algebras given by cycles-/
 
 def RA37 := [[[]],
