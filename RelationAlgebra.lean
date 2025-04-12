@@ -263,6 +263,34 @@ instance instBooleanAlgebra : BooleanAlgebra (Set (X × X)) :=
     top := Set.univ,
     sdiff := (· \ ·) }
 
+def main : IO Unit :=
+  let hello := "world"
+  IO.println s!"Hello, {hello}!"
+
+#eval main
+
+instance instBooleanAlgebraSet : BooleanAlgebra (Set α) :=
+  { (inferInstance : BooleanAlgebra (α → Prop)) with
+    sup := (· ∪ ·),
+    inf := (· ∩ ·),
+    le := (· ⊆ ·),
+    lt := fun s t => s ⊆ t ∧ ¬t ⊆ s,
+    bot := ∅,
+    top := Set.univ,
+    compl := fun s => { x | x ∉ s },
+    sdiff := fun s t => { x | x ∈ s ∧ x ∉ t } }
+
+#check instBooleanAlgebraSet
+
+
+instance instLatticeSet : Lattice (Set α) :=
+  { (inferInstance : Lattice (α → Prop)) with
+    sup := (· ∪ ·),
+    inf := (· ∩ ·),
+    le := (· ⊆ ·),
+    lt := fun s t => s ⊆ t ∧ ¬t ⊆ s }
+
+
 #print Multiset
 
 #print inferInstance
@@ -890,3 +918,11 @@ def ra4p := [[
 -- 83_83
 ["rrr","sss","rrR","ssS","rrs","rrS","ssr","ssR","srr","rsr","rss","srs"]
 ]]
+
+#eval ra4p[6][0][0].toList[0]
+
+def opTable (cyc : List String) : String :=
+  if cyc ≠ [] then cyc.head
+  else ""
+
+#eval! opTable ra4p[6][0]
