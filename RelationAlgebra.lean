@@ -96,8 +96,8 @@ def isJtrue (t u v w x y z : A) : Prop :=
 def isLtrue (u v w x y z : A) : Prop :=
   x;y ⊓ z;w ⊓ u;v ≤ x;((x⁻¹;z ⊓ y;w⁻¹);(z⁻¹;u ⊓ w;v⁻¹) ⊓ x⁻¹;u ⊓ y;v⁻¹);v
 
-def isMtrue (t u v w x y z : A) : Prop := sorry
-  --t ⊓ (u ⊓ v;w);(x ⊓ y;z) ≤ x ; ((x⁻¹ ; z ⊓ y ; w⁻¹) ; (z⁻¹ ; u ⊓ w ; v⁻¹) ⊓ x⁻¹ ; u ⊓ y ; v⁻¹) ; v
+def isMtrue (t u v w x y z : A) : Prop :=
+  t ⊓ (u ⊓ v;w);(x ⊓ y;z) ≤ v;((v⁻¹;t ⊓ w;x);z ⊓ w;y ⊓ v⁻¹;(u;y ⊓ t;z⁻¹));z
 
 
 
