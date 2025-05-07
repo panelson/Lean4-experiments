@@ -1,7 +1,9 @@
 import Mathlib.Order.BooleanAlgebra
 import Mathlib.Order.Lattice
 import Mathlib.Algebra.Group.Defs
---import Mathlib.Logic.Basic
+import Mathlib.Logic.Basic
+import Mathlib.Data.Set.Basic
+import Mathlib.Data.Set.Defs
 import Mathlib.Data.Finset.Basic
 import Mathlib.Data.Fintype.Basic
 
@@ -89,19 +91,6 @@ open RelationAlgebra
 
 variable {A : Type u} [RelationAlgebra A]
 
-
-def isJtrue (t u v w x y z : A) : Prop :=
-  t ≤ u;v ⊓ w;x  ∧  u⁻¹;w ⊓ v;x⁻¹ ≤ y;z → t ≤ (u;y ⊓ w;z⁻¹);(y⁻¹;v ⊓ x;z)
-
-def isLtrue (u v w x y z : A) : Prop :=
-  x;y ⊓ z;w ⊓ u;v ≤ x;((x⁻¹;z ⊓ y;w⁻¹);(z⁻¹;u ⊓ w;v⁻¹) ⊓ x⁻¹;u ⊓ y;v⁻¹);v
-
-def isMtrue (t u v w x y z : A) : Prop :=
-  t ⊓ (u ⊓ v;w);(x ⊓ y;z) ≤ v;((v⁻¹;t ⊓ w;x);z ⊓ w;y ⊓ v⁻¹;(u;y ⊓ t;z⁻¹));z
-
-
-
--- Note on Aesop: Simp Lemmas are used by aesop when recursively simplifying what the goal or hypothesis --> they call these normalisation rules and are customizsable. Aesop is essentially recursively making use of the best possible normalisation rule and making obvious deductions
 
 
 /- these simp lemmas are not needed so far
@@ -243,7 +232,7 @@ P(X²) is the power set of X², ∪ is the union of sets, ∩ is the intersectio
 Set (X x X)
 -/
 
-variable (X : Type u) --(R : Set (X × X))
+variable (X : Type) --(R : Set (X × X))
 
 
 instance Prop.instBooleanAlgebra1 : BooleanAlgebra Prop where
@@ -284,7 +273,7 @@ instance instBooleanAlgebraSet : BooleanAlgebra (Set α) :=
 
 
 instance instLatticeSet : Lattice (Set α) :=
-  { (inferInstance : Lattice (α → Prop)) with
+    { (inferInstance : Lattice (α → Prop)) with
     sup := (· ∪ ·),
     inf := (· ∩ ·),
     le := (· ⊆ ·),
@@ -295,22 +284,34 @@ instance instLatticeSet : Lattice (Set α) :=
 
 #print inferInstance
 
+
+instance fullRelationAlgebra : RelationAlgebra (Set (X × X)) :=
+  { (inferInstance : BooleanAlgebra ((X × X) → Prop)) with
+    sup := (· ∪ ·),
+    inf := (· ∩ ·),
+    bot := ∅,
+    compl := (·ᶜ),
+    top := Set.univ,
+    sdiff := (· \ ·) }
+
+#check Set.Subset.refl
+
 instance fullRA : RelationAlgebra (Set (X × X)) where
   bot := ∅
   top := Set.univ
   sup := (· ∪ ·)
   inf := (· ∩ ·)
-  le := (· ≤ ·)
+  le := (· ⊆ ·)
   lt := fun s t => s ⊆ t ∧ ¬t ⊆ s
   sdiff := (· \ ·)
   compl := (·ᶜ)
   comp R S := { (x, y) | ∃ z, (x, z) ∈ R ∧ (z, y) ∈ S }
   one := { (x, y) | x = y }
   inv R := { (y, x) | (x, y) ∈ R }
-  le_refl := by sorry
-  le_trans := by sorry
-  le_antisymm := by sorry
-  le_sup_left := by sorry
+  le_refl := Set.Subset.refl
+  le_trans := by apply Set.Subset.trans
+  le_antisymm := by apply Set.Subset.antisymm
+  le_sup_left := by apply Set.Subset.subset_union_left
   le_sup_right := by sorry
   sup_le := by sorry
   le_inf := by sorry
@@ -321,7 +322,8 @@ instance fullRA : RelationAlgebra (Set (X × X)) where
   top_le_sup_compl := by sorry
   bot_le := by sorry
   le_top := by sorry
-  assoc x y z := by sorry
+  assoc x y z := by
+    sorry
   rdist x y z := by sorry
   comp_one x := by sorry
   conv_conv x := by sorry
@@ -370,7 +372,7 @@ instance : RelationAlgebra (Set G) where
 class Ternary (S : Type) where
   ternary : S → S → S → Prop
 
-notation "R "  => Ternary.ternary
+notation "R₃ "  => Ternary.ternary
 
 class Unary (S : Type) where
   unary : S → Prop
@@ -378,36 +380,36 @@ class Unary (S : Type) where
 prefix:90 "I "  => Unary.unary
 
 class AtomStructure (S : Type) extends Ternary S, Inv S, Unary S where
-  peirce1 : ∀ x y z : S, R x y z ↔ R x⁻¹ z y
-  peirce2 : ∀ x y z : S, R x y z ↔ R z y⁻¹ x
+  peirce1 : ∀ x y z : S, R₃ x y z ↔ R₃ x⁻¹ z y
+  peirce2 : ∀ x y z : S, R₃ x y z ↔ R₃ z y⁻¹ x
   id : ∃ x : S, I x
-  identity1 : ∀ x y u : S, I u ∧ R x u y → x = y
-  identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R x u y
-  assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
+  identity1 : ∀ x y u : S, I u ∧ R₃ x u y → x = y
+  identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R₃ x u y
+  assoc : ∀ u x y z w : S, R₃ x y u ∧ R₃ u z w → ∃ v : S, R₃ y z v ∧ R₃ x v w
 
 open AtomStructure
 
 variable {S : Type} [AtomStructure S]
 
 lemma conv_conv1 (x : S) : x⁻¹⁻¹ = x := by
-  have h : ∃ e : S, x = x → I e ∧ R x e x := identity2 x x
+  have h : ∃ e : S, x = x → I e ∧ R₃ x e x := identity2 x x
   cases' h with e em
-  have h' : I e ∧ R x e x := em rfl
+  have h' : I e ∧ R₃ x e x := em rfl
   have h'' : I e := h'.1
-  have h''' : R x e x := h'.2
-  have h1 : R x⁻¹ x e := by rw [peirce1] at h'''; exact h'''
-  have h2 : R x⁻¹⁻¹ e x := by rw [peirce1] at h1; exact h1
-  have h3 : I e ∧ R x⁻¹⁻¹ e x → x⁻¹⁻¹ = x := identity1 x⁻¹⁻¹ x e
+  have h''' : R₃ x e x := h'.2
+  have h1 : R₃ x⁻¹ x e := by rw [peirce1] at h'''; exact h'''
+  have h2 : R₃ x⁻¹⁻¹ e x := by rw [peirce1] at h1; exact h1
+  have h3 : I e ∧ R₃ x⁻¹⁻¹ e x → x⁻¹⁻¹ = x := identity1 x⁻¹⁻¹ x e
   exact h3 ⟨h'', h2⟩
 
 /- define atom structure with atoms e, a, b and relations
-  R e e e, R e a a, R e b b,
-  R a e a, R a a b, R a b e,
-  R b e b, R b a e, R b b a -/
+  R₃ e e e, R₃ e a a, R₃ e b b,
+  R₃ a e a, R₃ a a b, R₃ a b e,
+  R₃ b e b, R₃ b a e, R₃ b b a -/
 
 #check (0 : Fin 3)
 
-/- The group Z_3 as atom structure -/
+/- The group Z_3 as atom structure
 inductive Z₃ : Type | e : Z₃ | a : Z₃ | b : Z₃
 open Z₃
 def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
@@ -417,19 +419,19 @@ def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
 | _, _, _ => False
 def Z₃.inv : Z₃ → Z₃ := fun | e => e | a => b | b => a
 def Z₃.unary : Z₃ → Prop := fun | e => True | _ => False
-
+-/
 --Want comp :
 S → S → Finset S
 --Or
 #check S → S → Set S
 
 structure AtomStruct (S : Type) extends Ternary S, Inv S, Unary S where
-  peirce1 : ∀ x y z : S, R x y z ↔ R x⁻¹ z y
-  peirce2 : ∀ x y z : S, R x y z ↔ R z y⁻¹ x
+  peirce1 : ∀ x y z : S, R₃ x y z ↔ R₃ x⁻¹ z y
+  peirce2 : ∀ x y z : S, R₃ x y z ↔ R₃ z y⁻¹ x
   id : ∃ x : S, I x
-  identity1 : ∀ x y u : S, I u ∧ R x u y → x = y
-  identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R x u y
-  assoc : ∀ u x y z w : S, R x y u ∧ R u z w → ∃ v : S, R y z v ∧ R x v w
+  identity1 : ∀ x y u : S, I u ∧ R₃ x u y → x = y
+  identity2 : ∀ x y : S, ∃ u : S, x = y → I u ∧ R₃ x u y
+  assoc : ∀ u x y z w : S, R₃ x y u ∧ R₃ u z w → ∃ v : S, R₃ y z v ∧ R₃ x v w
 /-
 structure AtomStruct
 
@@ -461,9 +463,9 @@ instance : AtomStructure (Z₃) where
 
   -- can implement the cases with tactic, the "with" keyword is used to provide the witness for the existential quantifier
 
---#eval R a e a
+--#eval R₃ a e a
 
-example : I a ∧ R a a e → e = a := by
+example : I a ∧ R₃ a a e → e = a := by
   intro h
   have k : I a := by exact h.1
   have : False := by simp at k; exact k
@@ -474,29 +476,125 @@ example : I a = False := by
   have : False := by simp at this; exact this
   exact False.elim this
 -/
-example : I e ∧ R a a e → e = e := by intro; rfl
+example : I e ∧ R₃ a a e → e = e := by intro; rfl
 
-lemma peirce3 (x y z : S) : R x y z ↔ R y⁻¹ x⁻¹ z⁻¹ := by
+lemma peirce3 (x y z : S) : R₃ x y z ↔ R₃ y⁻¹ x⁻¹ z⁻¹ := by
   rw [peirce1, peirce2, peirce1]
 
---assoc : ∀ u x y z w : S, R  x  y   u   ∧ R u   z   w → ∃ v : S, R y z v ∧ R x v w
---                         R z⁻¹ y⁻¹ v⁻¹ ∧ R v⁻¹ x⁻¹ w⁻¹
+--assoc : ∀ u x y z w : S, R₃  x  y   u   ∧ R₃ u   z   w → ∃ v : S, R₃ y z v ∧ R₃ x v w
+--                         R₃ z⁻¹ y⁻¹ v⁻¹ ∧ R₃ v⁻¹ x⁻¹ w⁻¹
 
 
 
 
-lemma assocr (u x y z w : S) : R y z v ∧ R x v w → ∃ u : S, R x y u ∧ R u z w := by
+lemma assocr (u x y z w : S) : R₃ y z v ∧ R₃ x v w → ∃ u : S, R₃ x y u ∧ R₃ u z w := by
   rintro ⟨hyzv, hxvw⟩ --Destructure the conjunction hypothesis
-  have hxvw' : R v⁻¹ x⁻¹ w⁻¹ := (peirce3 x v w).mp hxvw
-  have hyzv' : R z⁻¹ y⁻¹ v⁻¹ := (peirce3 y z v).mp hyzv
-  have hand : R z⁻¹ y⁻¹ v⁻¹ ∧ R v⁻¹ x⁻¹ w⁻¹ := ⟨hyzv', hxvw'⟩
-  have h : ∃ t : S, R y⁻¹ x⁻¹ t ∧ R z⁻¹ t w⁻¹ := (AtomStructure.assoc v⁻¹ z⁻¹ y⁻¹ x⁻¹ w⁻¹) hand
+  have hxvw' : R₃ v⁻¹ x⁻¹ w⁻¹ := (peirce3 x v w).mp hxvw
+  have hyzv' : R₃ z⁻¹ y⁻¹ v⁻¹ := (peirce3 y z v).mp hyzv
+  have hand : R₃ z⁻¹ y⁻¹ v⁻¹ ∧ R₃ v⁻¹ x⁻¹ w⁻¹ := ⟨hyzv', hxvw'⟩
+  have h : ∃ t : S, R₃ y⁻¹ x⁻¹ t ∧ R₃ z⁻¹ t w⁻¹ := (AtomStructure.assoc v⁻¹ z⁻¹ y⁻¹ x⁻¹ w⁻¹) hand
   cases' h with c mh
-  have h1 : R x⁻¹⁻¹ y⁻¹⁻¹ c⁻¹ := (peirce3 _ _ _).mp mh.1
-  have h2 : R c⁻¹ z⁻¹⁻¹ w⁻¹⁻¹ := (peirce3 _ _ _).mp mh.2
-  have h3 : R x y c⁻¹ := by rw [conv_conv1, conv_conv1] at h1; exact h1
-  have h4 : R c⁻¹ z w := by rw [conv_conv1, conv_conv1] at h2; exact h2
+  have h1 : R₃ x⁻¹⁻¹ y⁻¹⁻¹ c⁻¹ := (peirce3 _ _ _).mp mh.1
+  have h2 : R₃ c⁻¹ z⁻¹⁻¹ w⁻¹⁻¹ := (peirce3 _ _ _).mp mh.2
+  have h3 : R₃ x y c⁻¹ := by rw [conv_conv1, conv_conv1] at h1; exact h1
+  have h4 : R₃ c⁻¹ z w := by rw [conv_conv1, conv_conv1] at h2; exact h2
   use c⁻¹
+
+
+
+variable {X : Type} (R S T : Set (X × X))
+
+def com (R S : Set (X × X)) : Set (X × X) :=
+  { (x, y) | ∃ z, (x, z) ∈ R ∧ (z, y) ∈ S }
+
+def inv (R : Set (X × X)) : Set (X × X) :=
+  { (y, x) | (x, y) ∈ R }
+
+infixl:90 " ; "  => com
+
+postfix:100 "⁻¹" => inv
+
+theorem comp_assoc : (a, b) ∈ (R ; S) ; T → (a, b) ∈ R ; (S ; T) := by
+  intro h
+  rcases h with ⟨z, h₁, _⟩
+  rcases h₁ with ⟨x,_,_⟩
+  use x
+  constructor
+  trivial
+  use z
+
+
+def isJtrue (t u v w x y z : A) : Prop :=
+  t ≤ u;v ⊓ w;x  ∧  u⁻¹;w ⊓ v;x⁻¹ ≤ y;z → t ≤ (u;y ⊓ w;z⁻¹);(y⁻¹;v ⊓ x;z)
+
+def isLtrue (u v w x y z : A) : Prop :=
+  x;y ⊓ z;w ⊓ u;v ≤ x;((x⁻¹;z ⊓ y;w⁻¹);(z⁻¹;u ⊓ w;v⁻¹) ⊓ x⁻¹;u ⊓ y;v⁻¹);v
+
+def isMtrue (t u v w x y z : A) : Prop :=
+  t ⊓ (u ⊓ v;w);(x ⊓ y;z) ≤ v;((v⁻¹;t ⊓ w;x);z ⊓ w;y ⊓ v⁻¹;(u;y ⊓ t;z⁻¹));z
+
+variable {X : Type}(t u v w x y z : Set (X × X))
+
+theorem Mtrue :
+  t ∩ (u ∩ v ; w) ; (x ∩ y;z) ⊆ v;((v⁻¹;t ∩ w;x);z⁻¹ ∩ w;y ∩ v⁻¹;(u;y ∩ t;z⁻¹));z := by
+  intro (a,b)
+  intro h
+  rcases h with ⟨h1,h2⟩
+  rcases h2 with ⟨c,h1,h2⟩
+  rcases h1 with ⟨h3,h4⟩
+  rcases h4 with ⟨d,h5,h6⟩
+  rcases h2 with ⟨h7,h8⟩
+  rcases h8 with ⟨e,h9,h10⟩
+  use e
+  constructor
+  use d
+  constructor
+  trivial
+  constructor
+  constructor
+  use b
+  constructor
+  constructor
+  use a
+  constructor
+  rw [inv]
+  dsimp
+  trivial
+  trivial
+  use c
+  rw [inv]
+  dsimp
+  trivial
+  use c
+  use a
+  constructor
+  rw [inv]
+  dsimp
+  trivial
+  constructor
+  use c
+  use b
+  constructor
+  trivial
+  rw [inv]
+  dsimp
+  trivial
+  trivial
+
+
+-- Note on Aesop: Simp Lemmas are used by aesop when recursively simplifying what the goal or hypothesis --> they call these normalisation rules and are customizsable. Aesop is essentially recursively making use of the best possible normalisation rule and making obvious deductions
+
+example : (a,b) ∈ x ∧ (a,b) ∈ y → (a,b) ∈ x ∩ y := by
+  intro h
+  constructor
+  rcases h with ⟨h1,h2⟩
+  trivial
+  rcases h with ⟨h1,h2⟩
+  trivial
+
+example : x ∩ y = y ∩ x := by
+  ext
+  simp [and_comm]
 
 
 -- RAbook1to4plus83.py, Python file, 2025-03-07 by Peter Jipsen & Pace Nelson
