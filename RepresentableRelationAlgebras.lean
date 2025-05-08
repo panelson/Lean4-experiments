@@ -86,3 +86,7 @@ theorem Jtrue :
   intro (a,b)
   intro h₁
   sorry
+
+theorem Ltrue :
+  x;y ∩ z;w ∩ u;v ⊆ x;((x⁻¹;z ∩ y;w⁻¹);(z⁻¹;u ∩ w;v⁻¹) ∩ x⁻¹;u ∩ y;v⁻¹);v := by
+  sorry
