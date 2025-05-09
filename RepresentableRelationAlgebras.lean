@@ -85,8 +85,24 @@ theorem Jtrue :
   intro h
   intro (a,b)
   intro h₁
+  rcases h with ⟨h2,h3⟩
   sorry
 
 theorem Ltrue :
   x;y ∩ z;w ∩ u;v ⊆ x;((x⁻¹;z ∩ y;w⁻¹);(z⁻¹;u ∩ w;v⁻¹) ∩ x⁻¹;u ∩ y;v⁻¹);v := by
+  intro (a,b)
+  intro h
+  rcases h with ⟨h1, h2⟩
+  rcases h1 with ⟨h3,h4⟩
+  rcases h3 with ⟨e, h3, h5⟩
+  rcases h4 with ⟨d, h3, h4⟩
+  rcases h2 with ⟨c, h1, h2⟩
+  use e
+  constructor
+  use d
+  constructor
+
+
+
+
   sorry
