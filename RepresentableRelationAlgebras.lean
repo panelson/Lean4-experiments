@@ -24,7 +24,7 @@ theorem comp_assoc : (a, b) ∈ (R ; S) ; T → (a, b) ∈ R ; (S ; T) := by
 
 
 def isJtrue (t u v w x y z : Set (X × X)) : Prop :=
-  t ≤ u;v ∩ w;x  ∧  u⁻¹;w ∩ v;x⁻¹ ⊆ y;z → t ≤ (u;y ∩ w;z⁻¹);(y⁻¹;v ∩ x;z)
+  t ⊆ u;v ∩ w;x  ∧  u⁻¹;w ∩ v;x⁻¹ ⊆ y;z → t ⊆ (u;y ∩ w;z⁻¹);(y⁻¹;v ∩ x;z)
 
 def isLtrue (u v w x y z : Set (X × X)) : Prop :=
   x;y ∩ z;w ∩ u;v ⊆ x;((x⁻¹;z ∩ y;w⁻¹);(z⁻¹;u ∩ w;v⁻¹) ∩ x⁻¹;u ∩ y;v⁻¹);v
@@ -81,12 +81,36 @@ theorem Mtrue :
   trivial
 
 theorem Jtrue :
-  t ⊆ u;v ∩ w;x  ∧  u⁻¹;w ∩ v;x⁻¹ ⊆ y;z → t ⊆ (u;y ∩ w;z⁻¹);(y⁻¹;v ∩ x;z) := by
+  t ⊆ u;v ∩ w;x  ∧  u⁻¹;w ∩ v;x⁻¹ ⊆ y;z → t ⊆ (u;y ∩ w;z⁻¹);(y⁻¹;v ∩ z;x) := by
   intro h
   intro (a,b)
   intro h₁
-  rcases h with ⟨h2,h3⟩
-  sorry
+  rcases h with ⟨h₂,h₃⟩
+  have h₄ : (a, b) ∈ u ; v ∩ w ; x := Set.mem_of_mem_of_subset h₁ h₂
+  rcases h₄ with ⟨h₅, h₆⟩
+  rcases h₅ with ⟨c, h₇, h₈⟩
+  rcases h₆ with ⟨d, h₉, H₁⟩
+  have H₂ : (c, a) ∈ u⁻¹ := by rw [inv]; dsimp; trivial
+  have H₃ : (c, d) ∈ u⁻¹ ; w := by use a
+  have H₄ : (b, d) ∈ x⁻¹ := by rw [inv]; dsimp; trivial
+  have H₅ : (c, d) ∈ v ; x⁻¹ := by use b
+  have H₆ : (c, d) ∈ u⁻¹ ; w ∩ v ; x⁻¹ := by constructor; trivial; trivial
+  have H₇ : (c, d) ∈ y ; z := Set.mem_of_mem_of_subset H₆ h₃
+  rcases H₇ with ⟨e, H₈, H₉⟩
+  use e
+  constructor
+  constructor
+  use c
+  constructor
+  trivial
+  constructor
+  use c
+  constructor
+  rw [inv]
+  dsimp
+  trivial
+  trivial
+  use d
 
 theorem Ltrue :
   x;y ∩ z;w ∩ u;v ⊆ x;((x⁻¹;z ∩ y;w⁻¹);(z⁻¹;u ∩ w;v⁻¹) ∩ x⁻¹;u ∩ y;v⁻¹);v := by
@@ -97,12 +121,51 @@ theorem Ltrue :
   rcases h3 with ⟨e, h3, h5⟩
   rcases h4 with ⟨d, h3, h4⟩
   rcases h2 with ⟨c, h1, h2⟩
+  use c
+  constructor
   use e
+  constructor
+  trivial
+  constructor
   constructor
   use d
   constructor
-
-
-
-
-  sorry
+  constructor
+  use a
+  constructor
+  rw [inv]
+  dsimp
+  trivial
+  trivial
+  use b
+  constructor
+  trivial
+  rw [inv]
+  dsimp
+  trivial
+  constructor
+  use a
+  constructor
+  rw [inv]
+  dsimp
+  trivial
+  trivial
+  use b
+  constructor
+  trivial
+  rw [inv]
+  dsimp
+  trivial
+  use a
+  constructor
+  rw [inv]
+  dsimp
+  trivial
+  trivial
+  use b
+  constructor
+  trivial
+  rw [inv]
+  dsimp
+  trivial
+  trivial
