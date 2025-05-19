@@ -178,8 +178,7 @@ lemma peirce_law1 (x y z : A) : x ; y ⊓ z = ⊥ ↔ x⁻¹ ; z ⊓ y = ⊥ := 
     have : z ≤ (x ; y)ᶜ := by
       rw [←compl_le_compl_iff_le, compl_compl] at this; exact this
     have : x⁻¹ ; z ≤ x⁻¹ ; (x ; y)ᶜ := comp_le_comp_left x⁻¹ this
-    have : x⁻¹ ; z ⊓ y ≤ ⊥ := by
-      calc
+    have : x⁻¹ ; z ⊓ y ≤ ⊥ := by calc
         x⁻¹ ; z ⊓ y ≤ x⁻¹ ; (x ; y)ᶜ ⊓ y := inf_le_inf_right y this
         _ ≤ yᶜ ⊓ y := inf_le_inf_right y (schroeder x y)
         _ = ⊥ := by simp
@@ -409,7 +408,24 @@ lemma conv_conv1 (x : S) : x⁻¹⁻¹ = x := by
 
 #check (0 : Fin 3)
 
-/- The group Z_3 as atom structure
+inductive M : Type | e : M | a : M | r : M | r₁ : M
+open M
+def M.ternary : M → M → M → Prop := fun
+| e, e, e => True | e, a, a => True | e, r, r => True
+| e, r₁, r₁ => True | a, e, a => True | a, a, e => True
+| a, a, r => True | a, a, r₁ => True | a, r, a => True
+| a, r, r => True | a, r₁, a => True | a, r₁, r₁ => True
+| r, e, r => True | r, a, a => True | r, a, r => True
+| r, r, r => True | r, r₁, e => True | r, r₁, a => True
+| r, r₁, r => True | r, r₁, r₁ => True | r₁, e, r₁ => True
+| r₁, a, a => True | r₁, a, r₁ => True | r₁, r, e => True
+| r₁, r, a => True | r₁, r, r => True | r₁, r, r₁ => True
+| r₁, r₁, r₁ => True | _, _, _ => False
+def M.inv : M → M := fun | e => e | a => a | r => r₁ | r₁ => r
+def M.unary : M → Prop := fun | e => True | _ => False
+
+
+/- The group Z_3 as atom structure-/
 inductive Z₃ : Type | e : Z₃ | a : Z₃ | b : Z₃
 open Z₃
 def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
@@ -419,10 +435,10 @@ def Z₃.ternary : Z₃ → Z₃ → Z₃ → Prop := fun
 | _, _, _ => False
 def Z₃.inv : Z₃ → Z₃ := fun | e => e | a => b | b => a
 def Z₃.unary : Z₃ → Prop := fun | e => True | _ => False
--/
---Want comp :
-S → S → Finset S
+/- -/
+--Want comp : S → S → Finset S
 --Or
+
 #check S → S → Set S
 
 structure AtomStruct (S : Type) extends Ternary S, Inv S, Unary S where

@@ -1,4 +1,9 @@
 import Mathlib.Data.Set.Basic
+import Mathlib.Logic.Function.Basic
+import Mathlib.Logic.Relator
+import Mathlib.Tactic.Use
+import Mathlib.Tactic.MkIffOfInductiveProp
+import Mathlib.Tactic.SimpRw
 
 variable {X : Type u} (R S T : Set (X × X))
 variable (t u v w x y z : Set (X × X))
@@ -13,14 +18,53 @@ infixl:90 " ; "  => com
 
 postfix:100 "⁻¹" => inv
 
-theorem comp_assoc : (a, b) ∈ (R ; S) ; T → (a, b) ∈ R ; (S ; T) := by
-  intro h
-  rcases h with ⟨z, h₁, _⟩
-  rcases h₁ with ⟨x,_,_⟩
-  use x
+theorem comp_assoc : (R ; S) ; T = R ; (S ; T) := by
+  rw [Set.ext_iff]
+  intro (a,b)
   constructor
-  trivial
-  use z
+  · intro h
+    rcases h with ⟨z, h₁, _⟩
+    rcases h₁ with ⟨x,_,_⟩
+    use x
+    constructor
+    trivial
+    use z
+  · intro h₂
+    rcases h₂ with ⟨x, h₃, h₄⟩
+    rcases h₄ with ⟨y,_,_⟩
+    use y
+    constructor
+    use x
+    trivial
+
+theorem rdist : (R ∪ S) ; T = R ; T ∪ S ; T := by
+  rw [Set.ext_iff]
+  intro (a,b)
+  constructor
+  · intro h
+    rcases h with ⟨c, h₁, h₂⟩
+    rcases h₁
+    have h₃ : (a,b) ∈ R ; T := by use c
+    constructor
+    trivial
+  · intro h
+    rcases h
+    rcases
+
+
+
+
+
+
+
+
+
+theorem comp_assoc1 : (r ∘r p) ∘r q = r ∘r p ∘r q := by
+  funext a d
+  --apply propext
+  constructor
+  · exact fun ⟨c, ⟨b, hab, hbc⟩, hcd⟩ ↦ ⟨b, hab, c, hbc, hcd⟩
+  · exact fun ⟨b, hab, c, hbc, hcd⟩ ↦ ⟨c, ⟨b, hab, hbc⟩, hcd⟩
 
 
 def isJtrue (t u v w x y z : Set (X × X)) : Prop :=
@@ -120,7 +164,7 @@ theorem Ltrue :
   rcases h1 with ⟨h3,h4⟩
   rcases h3 with ⟨e, h3, h5⟩
   rcases h4 with ⟨d, h3, h4⟩
-  rcases h2 with ⟨c, h1, h2⟩
+  rcases h2 with ⟨c, h6, h7⟩
   use c
   constructor
   use e
