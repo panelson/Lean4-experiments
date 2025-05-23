@@ -468,8 +468,8 @@ instance : AtomStructure (Z₃) where
   ternary x y z := Z₃.ternary x y z
   unary x := Z₃.unary x
   inv x := Z₃.inv x
-  id := by cases e <;> exact ⟨e, trivial⟩
-  peirce1 x y z := by cases x <;> cases y <;> cases z <;> rfl
+  id := by cases e <;> exact ⟨eby cases x <;> cases y <;> cases z <;> rfl, trivial⟩
+  peirce1 x y z := 
   peirce2 x y z := by cases x <;> cases y <;> cases z <;> rfl
   identity1 x y u := by sorry --cases x <;> cases y <;> cases u <;> ((intro; rfl) <|> (intro h; exact False.elim h.1))
   identity2 x y := by cases x <;> cases y <;> (exists e <;> intro; trivial)
