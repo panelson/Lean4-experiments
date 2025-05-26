@@ -1,5 +1,5 @@
-import Mathlib.Order.CompleteBooleanAlgebra
-import Mathlib.Order.Defs.LinearOrder
+import Mathlib.Order.Lattice
+import Mathlib.Tactic.Tauto
 
 /--
 C₂ denotes the set {0,1} viewed as a (complete) lattice, which in Lean is constructed
@@ -7,30 +7,64 @@ from Prop, so 0 is denoted as ⊥ and 1 is denoted as ⊤
 --/
 
 inductive C₂ : Type where | a0 : C₂ | a1 : C₂
+instance latticeC₂ : Lattice C₂ where
+  le  := fun | C₂.a1, C₂.a0 => False | _, _ => True
+  sup := fun | C₂.a0, C₂.a0 => C₂.a0 | _, _ => C₂.a1
+  inf := fun | C₂.a1, C₂.a1 => C₂.a1 | _, _ => C₂.a0
+  le_refl      := by intro x; cases x; trivial; trivial
+  le_trans     := by intro x y z; cases x <;> cases y <;> simp
+  le_antisymm  := by intro x y; cases x <;> cases y <;> tauto
+  le_sup_left  := by intro x y; cases x <;> tauto
+  le_sup_right := by intro x y; cases x <;> cases y <;> tauto
+  sup_le       := by intro x y z; cases x <;> cases y <;> cases z <;> tauto
+  inf_le_left  := by intro x y; cases x <;> cases y <;> tauto
+  inf_le_right := by intro x y; cases x <;> cases y <;> tauto
+  le_inf       := by intro x y z; cases x <;> cases y <;> cases z <;> tauto
 
-def C₂.jn (x y : C₂) : C₂ :=
-  match x with
-  | C₂.a1 => C₂.a1
-  | C₂.a0 => y
+inductive C₃ : Type where | a0 : C₃ | a1 : C₃ | a2 : C₃
+instance latticeC₃ : Lattice C₃ where
+  le  := fun
+    | C₃.a1, C₃.a0 => False | C₃.a2, C₃.a1 => False | C₃.a2, C₃.a0 => False
+    | _, _ => True
+  sup := fun
+    | C₃.a0, C₃.a0 => C₃.a0 | C₃.a1, C₃.a0 => C₃.a1 | C₃.a0, C₃.a1 => C₃.a1
+    | C₃.a1, C₃.a1 => C₃.a1 | _, _ => C₃.a2
+  inf := fun
+    | C₃.a2, C₃.a2 => C₃.a2 | C₃.a1, C₃.a2 => C₃.a1 | C₃.a2, C₃.a1 => C₃.a1
+    | C₃.a1, C₃.a1 => C₃.a1 | _, _ => C₃.a0
+  le_refl      := by intro x; cases x <;> trivial
+  le_trans     := by intro x y z; cases x <;> cases y <;> cases z <;> simp
+  le_antisymm  := by intro x y; cases x <;> cases y <;> tauto
+  le_sup_left  := by intro x y; cases x <;> cases y <;> tauto
+  le_sup_right := by intro x y; cases x <;> cases y <;> tauto
+  sup_le       := by intro x y z; cases x <;> cases y <;> cases z <;> tauto
+  inf_le_left  := by intro x y; cases x <;> cases y <;> tauto
+  inf_le_right := by intro x y; cases x <;> cases y <;> tauto
+  le_inf       := by intro x y z; cases x <;> cases y <;> cases z <;> tauto
 
-#print PartialOrder
-
---instance instLE : LE C₂ := ⟨C₂.le⟩
---instance : LT C₂ := ⟨C₂.lt⟩
-
+#print Preorder
 
 instance preorder : Preorder C₂ where
-  le := fun | C₂.a1, C₂.a0 => False | _, _ => True 
+  le := fun | C₂.a1, C₂.a0 => False | _, _ => True
   le_refl := by intro x ; cases x ; trivial ; trivial
   le_trans := by intro x y z ; cases x <;> cases y <;> cases z <;> simp
-  lt_iff_le_not_le := by intro x y; cases x <;> cases y <;> simp
+  --lt_iff_le_not_le := by intro x y; cases x <;> cases y <;> simp
 
---open Classical
+/-instance poset : PartialOrder C₂ where
+  le_antisymm := by intro x y; cases x <;> cases y <;> tauto
 
-instance poset : PartialOrder C₂ where
-  le_antisymm := by 
-    intro x y; cases x <;> cases y <;> aesop
+instance joinsemilattice : SemilatticeSup C₂ where
+  sup := fun | C₂.a0, C₂.a0 => C₂.a0 | _, _ => C₂.a1
+  le_sup_left := by intro x y ; cases x <;> tauto
+  le_sup_right := by intro x y ; cases x <;> cases y <;> tauto
+  sup_le := by intro x y ; cases x <;> cases y <;> tauto
 
+instance meetsemilattice : SemilatticeInf C₂ where
+  inf := fun | C₂.a1, C₂.a1 => C₂.a1 | _, _ => C₂.a0
+  inf_le_left := by intro x y ; cases x <;> cases y <;> tauto
+  inf_le_right := by intro x y ; cases x <;> cases y <;> tauto
+  le_inf := by intro x y z ; cases x <;> cases y <;> cases z <;> tauto
+-/
 
 
 instance Bool.linearOrder1 : LinearOrder Bool where
