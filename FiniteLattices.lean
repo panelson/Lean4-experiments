@@ -1,4 +1,5 @@
 import Mathlib.Order.Lattice
+import Mathlib.Order.ModularLattice
 import Mathlib.Tactic.Tauto
 import Mathlib.Order.BooleanAlgebra
 
@@ -7,11 +8,11 @@ C₂ denotes the set {0,1} viewed as a (complete) lattice, which in Lean is cons
 from Prop, so 0 is denoted as ⊥ and 1 is denoted as ⊤
 --/
 
-inductive C₂ : Type where | a0 : C₂ | a1 : C₂
+inductive C₂ : Type where | a₀ : C₂ | a₁ : C₂
 instance latticeC₂ : Lattice C₂ where
-  le  := fun | C₂.a1, C₂.a0 => False | _, _ => True
-  sup := fun | C₂.a0, C₂.a0 => C₂.a0 | _, _ => C₂.a1
-  inf := fun | C₂.a1, C₂.a1 => C₂.a1 | _, _ => C₂.a0
+  le  := fun | C₂.a₁, C₂.a₀ => False | _, _ => True
+  sup := fun | C₂.a₀, C₂.a₀ => C₂.a₀ | _, _ => C₂.a₁
+  inf := fun | C₂.a₁, C₂.a₁ => C₂.a₁ | _, _ => C₂.a₀
   le_refl      := by intro x; cases x; trivial; trivial
   le_trans     := by intro x y z; cases x <;> cases y <;> simp
   le_antisymm  := by intro x y; cases x <;> cases y <;> tauto
@@ -22,17 +23,17 @@ instance latticeC₂ : Lattice C₂ where
   inf_le_right := by intro x y; cases x <;> cases y <;> tauto
   le_inf       := by intro x y z; cases x <;> cases y <;> cases z <;> simp
 
-inductive C₃ : Type where | a0 : C₃ | a1 : C₃ | a2 : C₃
+inductive C₃ : Type where | a₀ : C₃ | a₁ : C₃ | a₂ : C₃
 instance latticeC₃ : Lattice C₃ where
   le  := fun
-    | C₃.a1, C₃.a0 => False | C₃.a2, C₃.a1 => False | C₃.a2, C₃.a0 => False
+    | C₃.a₁, C₃.a₀ => False | C₃.a₂, C₃.a₁ => False | C₃.a₂, C₃.a₀ => False
     | _, _ => True
   sup := fun
-    | C₃.a0, C₃.a0 => C₃.a0 | C₃.a1, C₃.a0 => C₃.a1 | C₃.a0, C₃.a1 => C₃.a1
-    | C₃.a1, C₃.a1 => C₃.a1 | _, _ => C₃.a2
+    | C₃.a₀, C₃.a₀ => C₃.a₀ | C₃.a₁, C₃.a₀ => C₃.a₁ | C₃.a₀, C₃.a₁ => C₃.a₁
+    | C₃.a₁, C₃.a₁ => C₃.a₁ | _, _ => C₃.a₂
   inf := fun
-    | C₃.a2, C₃.a2 => C₃.a2 | C₃.a1, C₃.a2 => C₃.a1 | C₃.a2, C₃.a1 => C₃.a1
-    | C₃.a1, C₃.a1 => C₃.a1 | _, _ => C₃.a0
+    | C₃.a₂, C₃.a₂ => C₃.a₂ | C₃.a₁, C₃.a₂ => C₃.a₁ | C₃.a₂, C₃.a₁ => C₃.a₁
+    | C₃.a₁, C₃.a₁ => C₃.a₁ | _, _ => C₃.a₀
   le_refl      := by intro x; cases x <;> trivial
   le_trans     := by intro x y z; cases x <;> cases y <;> cases z <;> simp
   le_antisymm  := by intro x y; cases x <;> cases y <;> tauto
@@ -70,16 +71,22 @@ instance latticeN₅ : Lattice N₅ where
   le_antisymm  := by intro x y; cases x <;> cases y <;> tauto
   le_sup_left  := by intro x y; cases x <;> cases y <;> tauto
   le_sup_right := by intro x y; cases x <;> cases y <;> tauto
-  sup_le       := by intro x y z; cases x <;> cases y <;> cases z <;> tauto
+  sup_le       := by intro x y z; cases x <;> cases y <;> cases z <;> simp
   inf_le_left  := by intro x y; cases x <;> cases y <;> tauto
   inf_le_right := by intro x y; cases x <;> cases y <;> tauto
   le_inf       := by intro x y z; cases x <;> cases y <;> cases z <;> simp
+
+theorem N₅notModular : ¬ (IsModularLattice N₅) := by
+  intro h
+  sorry
+
+--#eval IsModularLattice N₅
 
 #print BooleanAlgebra
 #print latticeC₃
 
 instance preorder : Preorder C₂ where
-  le := fun | C₂.a1, C₂.a0 => False | _, _ => True
+  le := fun | C₂.a₁, C₂.a₀ => False | _, _ => True
   le_refl := by intro x ; cases x ; trivial ; trivial
   le_trans := by intro x y z ; cases x <;> cases y <;> cases z <;> simp
   --lt_iff_le_not_le := by intro x y; cases x <;> cases y <;> simp
@@ -88,13 +95,13 @@ instance preorder : Preorder C₂ where
   le_antisymm := by intro x y; cases x <;> cases y <;> tauto
 
 instance joinsemilattice : SemilatticeSup C₂ where
-  sup := fun | C₂.a0, C₂.a0 => C₂.a0 | _, _ => C₂.a1
+  sup := fun | C₂.a₀, C₂.a₀ => C₂.a₀ | _, _ => C₂.a₁
   le_sup_left := by intro x y ; cases x <;> tauto
   le_sup_right := by intro x y ; cases x <;> cases y <;> tauto
   sup_le := by intro x y ; cases x <;> cases y <;> tauto
 
 instance meetsemilattice : SemilatticeInf C₂ where
-  inf := fun | C₂.a1, C₂.a1 => C₂.a1 | _, _ => C₂.a0
+  inf := fun | C₂.a₁, C₂.a₁ => C₂.a₁ | _, _ => C₂.a₀
   inf_le_left := by intro x y ; cases x <;> cases y <;> tauto
   inf_le_right := by intro x y ; cases x <;> cases y <;> tauto
   le_inf := by intro x y z ; cases x <;> cases y <;> cases z <;> tauto
@@ -126,7 +133,7 @@ instance Bool.instDistribLattice1 : DistribLattice Bool :=
 #eval false < true
 #eval (false ≤ true)
 
-instance Bool.instBooleanAlgebra1 : BooleanAlgebra Bool where
+instance Bool.instBooleanAlgebra₁ : BooleanAlgebra Bool where
   __ := instDistribLattice1
   __ := linearOrder
   __ := instBoundedOrder
